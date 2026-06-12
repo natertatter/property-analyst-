@@ -193,12 +193,26 @@ button:disabled {
 }
 
 .popup-links {
-  margin-top: 0.5rem;
-  font-size: 0.85rem;
+  margin-top: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
 .popup-links a {
   color: #2563eb;
+}
+
+.popup-btn-cosl {
+  display: inline-block;
+  text-align: center;
+  text-decoration: none !important;
+  margin-top: 0.25rem;
+}
+
+.property-popup {
+  font-size: 0.9rem;
+  line-height: 1.45;
 }
 
 td.actions {

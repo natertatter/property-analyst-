@@ -136,10 +136,6 @@ function statePopupCounty(county, items) {
   `;
 }
 
-function parcelPopup(row) {
-  return propertyPopupHtml(row, BUILDING_LABELS);
-}
-
 function renderCountyMarkers(rows) {
   const byCounty = {};
   rows.forEach((row) => {
@@ -178,7 +174,8 @@ function renderParcelMarkers(rows) {
       fillColor: "#8b5cf6",
       fillOpacity: 0.85,
       weight: 1,
-    }).bindPopup(parcelPopup(row));
+    });
+    bindPropertyPopup(marker, row, BUILDING_LABELS);
     stateParcels.addLayer(marker);
     bounds.push([row.lat, row.lon]);
   });

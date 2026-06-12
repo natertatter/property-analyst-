@@ -95,7 +95,7 @@ function popupHtml(row) {
   return propertyPopupHtml(row, BUILDING_LABELS);
 }
 
-function jitterCoordinates(lat, lon, index, confidence) {
+function renderMap(rows) {
   if (confidence === "medium") return [lat, lon];
   const spread = confidence === "very_low" ? 0.008 : 0.004;
   const angle = (index * 137.5 * Math.PI) / 180;
@@ -120,7 +120,8 @@ function renderMap(rows) {
       fillColor: CONFIDENCE_COLORS[confidence] || "#333",
       fillOpacity: 0.75,
       weight: 2,
-    }).bindPopup(popupHtml(row));
+    });
+    bindPropertyPopup(marker, row, BUILDING_LABELS);
     markersLayer.addLayer(marker);
     bounds.push([lat, lon]);
   });

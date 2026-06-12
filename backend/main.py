@@ -72,6 +72,7 @@ class AnalyzeRequest(BaseModel):
 
 
 def _property_to_dict(prop: ParsedProperty, geo: Optional[dict] = None) -> dict:
+    cosl_property_url = prop.cosl_parcel_url or prop.catalog_url
     data = {
         "sale_number": prop.sale_number,
         "owner_name": prop.owner_name,
@@ -95,6 +96,7 @@ def _property_to_dict(prop: ParsedProperty, geo: Optional[dict] = None) -> dict:
         "datascout_url": prop.datascout_url,
         "cosl_parcel_url": prop.cosl_parcel_url,
         "catalog_url": prop.catalog_url,
+        "cosl_property_url": cosl_property_url,
     }
     if geo:
         data.update(geo)
@@ -132,6 +134,10 @@ async def _analyze_catalog(
     geocodes = []
     if geocode and filtered:
         geocodes = await geocode_properties(filtered)
+
+    for prop in filtered:
+        if not prop.catalog_url:
+            prop.catalog_url = catalog_url
 
     results = [
         _property_to_dict(prop, geo if geocode else None)
