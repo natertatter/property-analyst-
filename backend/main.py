@@ -11,6 +11,14 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from contents_scraper import (
+    DEFAULT_CONTENTS_URL,
+    entry_to_dict,
+    fetch_contents,
+    filter_entries,
+    sort_entries,
+)
+from county_geocoder import all_county_centroids
 from geocoder import geocode_properties
 from parser import ParsedProperty, matches_criteria
 from scraper import fetch_catalog
@@ -26,6 +34,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+class ContentsFilterRequest(BaseModel):
+    contents_url: str = DEFAULT_CONTENTS_URL
+    county_keywords: list[str] = Field(default_factory=list)
+    city_keywords: list[str] = Field(default_factory=list)
+    location_keywords: list[str] = Field(default_factory=list)
+    search_text: str = ""
+    counties: list[str] = Field(default_factory=list)
+    sort_by: str = "sale_date"
+    sort_dir: str = "asc"
 
 
 class AnalyzeRequest(BaseModel):
@@ -82,6 +101,50 @@ def _property_to_dict(prop: ParsedProperty, geo: Optional[dict] = None) -> dict:
 @app.get("/api/health")
 async def health():
     return {"status": "ok"}
+
+
+@app.get("/api/contents")
+async def get_contents(url: str = DEFAULT_CONTENTS_URL):
+    try:
+        meta, entries = await fetch_contents(url)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    return {
+        "meta": meta,
+        "county_centroids": all_county_centroids(),
+        "entries": [entry_to_dict(e) for e in entries],
+    }
+
+
+@app.post("/api/contents/filter")
+async def filter_contents(request: ContentsFilterRequest):
+    try:
+        meta, entries = await fetch_contents(request.contents_url)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    filtered = filter_entries(
+        entries,
+        request.county_keywords,
+        request.city_keywords,
+        request.location_keywords,
+        request.search_text,
+        request.counties,
+    )
+    sorted_entries = sort_entries(filtered, request.sort_by, request.sort_dir)
+
+    return {
+        "meta": meta,
+        "criteria": request.model_dump(),
+        "summary": {
+            "total_entries": len(entries),
+            "matched_entries": len(sorted_entries),
+            "unique_counties": len({e.county for e in sorted_entries}),
+            "unique_sale_dates": len({e.sale_date for e in sorted_entries}),
+        },
+        "entries": [entry_to_dict(e) for e in sorted_entries],
+    }
 
 
 @app.post("/api/analyze")

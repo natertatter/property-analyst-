@@ -1,3 +1,23 @@
+// Tab switching
+document.getElementById("tab-state").addEventListener("click", () => {
+  document.getElementById("tab-state").classList.add("active");
+  document.getElementById("tab-catalog").classList.remove("active");
+  document.getElementById("view-state").hidden = false;
+  document.getElementById("view-catalog").hidden = true;
+  document.getElementById("tab-state").setAttribute("aria-selected", "true");
+  document.getElementById("tab-catalog").setAttribute("aria-selected", "false");
+});
+
+document.getElementById("tab-catalog").addEventListener("click", () => {
+  document.getElementById("tab-catalog").classList.add("active");
+  document.getElementById("tab-state").classList.remove("active");
+  document.getElementById("view-catalog").hidden = false;
+  document.getElementById("view-state").hidden = true;
+  document.getElementById("tab-catalog").setAttribute("aria-selected", "true");
+  document.getElementById("tab-state").setAttribute("aria-selected", "false");
+  setTimeout(() => map.invalidateSize(), 100);
+});
+
 const map = L.map("map").setView([36.48, -94.28], 12);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors",

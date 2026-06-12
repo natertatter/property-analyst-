@@ -10,94 +10,183 @@
 <body>
   <header>
     <h1>Tax Sale Property Analyzer</h1>
-    <p>Prototype for filtering Arkansas COSL tax sale catalogs and mapping matched parcels.</p>
+    <p>Arkansas COSL tax sale catalogs — state overview and parcel-level analysis.</p>
+    <nav class="tabs" role="tablist">
+      <button id="tab-state" class="tab active" role="tab" aria-selected="true">State Overview</button>
+      <button id="tab-catalog" class="tab" role="tab" aria-selected="false">Catalog Analyzer</button>
+    </nav>
   </header>
 
   <main>
-    <section class="panel controls">
-      <h2>Catalog &amp; Criteria</h2>
-      <form id="analyze-form">
-        <label>
-          Catalog URL
-          <input
-            id="catalog-url"
-            type="url"
-            required
-            value="https://cosl.org/Home/CatalogView?county=BENT&amp;saledate=8%2F11%2F2026%2010%3A00%3A00%20AM"
-          />
-        </label>
+    <!-- STATE OVERVIEW -->
+    <div id="view-state" class="view active">
+      <section class="panel controls">
+        <h2>State Auction Calendar</h2>
+        <p class="hint">Data from <a href="https://cosl.org/Home/Contents" target="_blank" rel="noopener">COSL Contents</a></p>
+        <form id="state-form">
+          <label>
+            Contents URL
+            <input id="contents-url" type="url" value="https://cosl.org/Home/Contents" />
+          </label>
+          <label>
+            County keywords
+            <input id="state-county-kw" type="text" placeholder="e.g. BENTON, WASHINGTON" />
+          </label>
+          <label>
+            Auction city keywords
+            <input id="state-city-kw" type="text" placeholder="e.g. SPRINGDALE, HOT SPRINGS" />
+          </label>
+          <label>
+            Venue / location keywords
+            <input id="state-location-kw" type="text" placeholder="e.g. CONVENTION CENTER" />
+          </label>
+          <label>
+            General search
+            <input id="state-search" type="text" placeholder="Any keyword across all fields" />
+          </label>
+          <div class="row">
+            <label>
+              Sort by
+              <select id="state-sort-by">
+                <option value="sale_date">Sale date</option>
+                <option value="county">County</option>
+                <option value="city">Auction city</option>
+                <option value="location">Venue</option>
+              </select>
+            </label>
+            <label>
+              Order
+              <select id="state-sort-dir">
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+              </select>
+            </label>
+          </div>
+          <div class="row">
+            <label>
+              Map view
+              <select id="state-geo-level">
+                <option value="state">Entire state (by county)</option>
+                <option value="county">County focus</option>
+              </select>
+            </label>
+            <label id="focus-county-wrap" hidden>
+              Focus county
+              <select id="state-focus-county"><option value="">Select county</option></select>
+            </label>
+          </div>
+          <button type="submit" id="state-submit-btn">Load &amp; Filter</button>
+        </form>
+        <p id="state-status" class="status"></p>
+        <div id="state-summary" class="summary-grid" hidden></div>
+      </section>
 
-        <label>
-          City / area keywords (comma-separated)
-          <input id="city-keywords" type="text" value="BELLA VISTA, BELLA VISTA VILLAGE" />
-        </label>
+      <section class="panel map-panel">
+        <h2>Geo View</h2>
+        <div id="state-map"></div>
+        <p class="hint">State view groups sales by county. County focus zooms to one county and shows auction locations.</p>
+      </section>
 
-        <div class="row">
-          <label>Min acres <input id="min-acres" type="number" step="0.01" min="0" /></label>
-          <label>Max acres <input id="max-acres" type="number" step="0.01" min="0" /></label>
+      <section class="panel table-panel">
+        <h2>County Sales <span id="state-result-count"></span></h2>
+        <div class="table-wrap">
+          <table id="state-table">
+            <thead>
+              <tr>
+                <th data-sort="sale_date">Sale Date</th>
+                <th data-sort="county">County</th>
+                <th data-sort="city">Auction City</th>
+                <th data-sort="location">Venue</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
         </div>
+      </section>
+    </div>
 
-        <div class="row">
-          <label>Min taxes ($) <input id="min-taxes" type="number" step="0.01" min="0" /></label>
-          <label>Max taxes ($) <input id="max-taxes" type="number" step="0.01" min="0" /></label>
+    <!-- CATALOG ANALYZER -->
+    <div id="view-catalog" class="view" hidden>
+      <section class="panel controls">
+        <h2>Catalog &amp; Criteria</h2>
+        <form id="analyze-form">
+          <label>
+            Catalog URL
+            <input
+              id="catalog-url"
+              type="url"
+              required
+              value="https://cosl.org/Home/CatalogView?county=BENT&amp;saledate=8%2F11%2F2026%2010%3A00%3A00%20AM"
+            />
+          </label>
+          <label>
+            City / area keywords (comma-separated)
+            <input id="city-keywords" type="text" value="BELLA VISTA, BELLA VISTA VILLAGE" />
+          </label>
+          <div class="row">
+            <label>Min acres <input id="min-acres" type="number" step="0.01" min="0" /></label>
+            <label>Max acres <input id="max-acres" type="number" step="0.01" min="0" /></label>
+          </div>
+          <div class="row">
+            <label>Min taxes ($) <input id="min-taxes" type="number" step="0.01" min="0" /></label>
+            <label>Max taxes ($) <input id="max-taxes" type="number" step="0.01" min="0" /></label>
+          </div>
+          <fieldset>
+            <legend>Building / land type</legend>
+            <label><input type="checkbox" name="building" value="platted_lot" checked /> Platted city lot</label>
+            <label><input type="checkbox" name="building" value="vacant_land" checked /> Vacant / rural land</label>
+            <label><input type="checkbox" name="building" value="mobile_home_lot" checked /> Mobile home lot</label>
+            <label><input type="checkbox" name="building" value="unknown" checked /> Unknown</label>
+          </fieldset>
+          <label>
+            Additional text filter
+            <input id="search-text" type="text" placeholder="e.g. YORK ADDITION" />
+          </label>
+          <label class="checkbox-inline">
+            <input id="geocode" type="checkbox" checked /> Geocode results on map
+          </label>
+          <button type="submit" id="submit-btn">Analyze Catalog</button>
+        </form>
+        <p id="status" class="status"></p>
+      </section>
+
+      <section class="panel summary" id="summary-panel" hidden>
+        <h2>Summary</h2>
+        <div id="summary"></div>
+      </section>
+
+      <section class="panel map-panel">
+        <h2>Parcel Map</h2>
+        <div id="map"></div>
+        <p class="hint">Markers use PLSS section centroids or address geocoding.</p>
+      </section>
+
+      <section class="panel table-panel">
+        <h2>Matched Properties <span id="result-count"></span></h2>
+        <div class="table-wrap">
+          <table id="results-table">
+            <thead>
+              <tr>
+                <th>Sale #</th>
+                <th>Owner</th>
+                <th>City</th>
+                <th>Acres</th>
+                <th>Taxes</th>
+                <th>Building</th>
+                <th>PLSS</th>
+                <th>Parcel</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
         </div>
-
-        <fieldset>
-          <legend>Building / land type</legend>
-          <label><input type="checkbox" name="building" value="platted_lot" checked /> Platted city lot</label>
-          <label><input type="checkbox" name="building" value="vacant_land" checked /> Vacant / rural land</label>
-          <label><input type="checkbox" name="building" value="mobile_home_lot" checked /> Mobile home lot</label>
-          <label><input type="checkbox" name="building" value="unknown" checked /> Unknown</label>
-        </fieldset>
-
-        <label>
-          Additional text filter
-          <input id="search-text" type="text" placeholder="e.g. YORK ADDITION" />
-        </label>
-
-        <label class="checkbox-inline">
-          <input id="geocode" type="checkbox" checked /> Geocode results on map (slower)
-        </label>
-
-        <button type="submit" id="submit-btn">Analyze Catalog</button>
-      </form>
-      <p id="status" class="status"></p>
-    </section>
-
-    <section class="panel summary" id="summary-panel" hidden>
-      <h2>Summary</h2>
-      <div id="summary"></div>
-    </section>
-
-    <section class="panel map-panel">
-      <h2>Map</h2>
-      <div id="map"></div>
-      <p class="hint">Markers use address geocoding when possible, otherwise PLSS section centroids. Low-confidence points are offset slightly so overlapping markers remain visible.</p>
-    </section>
-
-    <section class="panel table-panel">
-      <h2>Matched Properties <span id="result-count"></span></h2>
-      <div class="table-wrap">
-        <table id="results-table">
-          <thead>
-            <tr>
-              <th>Sale #</th>
-              <th>Owner</th>
-              <th>City</th>
-              <th>Acres</th>
-              <th>Taxes</th>
-              <th>Building</th>
-              <th>PLSS</th>
-              <th>Parcel</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
+      </section>
+    </div>
   </main>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/static/state.js"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>

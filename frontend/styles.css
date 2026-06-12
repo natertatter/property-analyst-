@@ -22,9 +22,35 @@ header h1 {
 }
 
 header p {
-  margin: 0;
+  margin: 0 0 0.75rem;
   opacity: 0.9;
   font-size: 0.95rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tab {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.45rem 0.85rem;
+  font-size: 0.9rem;
+}
+
+.tab.active {
+  background: #fff;
+  color: #1f3b57;
+}
+
+.view[hidden] {
+  display: none !important;
+}
+
+.view {
+  display: contents;
 }
 
 main {
@@ -53,7 +79,8 @@ label {
 
 input[type="text"],
 input[type="url"],
-input[type="number"] {
+input[type="number"],
+select {
   width: 100%;
   margin-top: 0.25rem;
   padding: 0.45rem 0.5rem;
@@ -109,10 +136,33 @@ button:disabled {
   color: #b91c1c;
 }
 
-#map {
+#map,
+#state-map {
   height: 420px;
   border: 1px solid #ccc;
   border-radius: 4px;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #2563eb;
+  padding: 0;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+td.actions {
+  white-space: nowrap;
+}
+
+#state-table th[data-sort] {
+  cursor: pointer;
+}
+
+#state-table th[data-sort]:hover {
+  background: #eef2ff;
 }
 
 .hint {

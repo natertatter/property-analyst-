@@ -4,9 +4,16 @@ Prototype web app for analyzing Arkansas Commissioner of State Lands (COSL) tax 
 
 ## Features
 
-- Scrapes COSL tax sale catalog pages (addresses and PLSS legal descriptions)
+### State Overview
+- Loads the [COSL Contents](https://cosl.org/Home/Contents) page — all Arkansas county tax sales
+- Filter and sort by county, auction city, venue, or any keyword
+- **Geo view**: entire state (county markers sized by sale count) or county focus (auction locations)
+- Click **Catalog** on any row to jump to parcel-level analysis for that county
+
+### Catalog Analyzer
+- Scrapes individual county catalog pages (addresses and PLSS legal descriptions)
 - Filters by city/area keywords, acreage, taxes owed, and estimated building/land type
-- Maps properties using address geocoding, PLSS section centroids (Arkansas GIS), or city-center fallback
+- Maps properties using PLSS section centroids (Arkansas GIS) or address geocoding
 - Responsive layout for desktop and mobile
 
 ## Quick start
@@ -34,6 +41,10 @@ Catalog data does not state whether a structure exists. The prototype estimates:
 | `unknown` | Could not classify |
 
 ## API
+
+`GET /api/contents?url=...` — fetch and parse the state Contents page
+
+`POST /api/contents/filter` — server-side filter/sort of contents entries
 
 `POST /api/analyze` with JSON body:
 
