@@ -95,7 +95,7 @@ function popupHtml(row) {
   return propertyPopupHtml(row, BUILDING_LABELS);
 }
 
-function renderMap(rows) {
+function jitterCoordinates(lat, lon, index, confidence) {
   if (confidence === "medium") return [lat, lon];
   const spread = confidence === "very_low" ? 0.008 : 0.004;
   const angle = (index * 137.5 * Math.PI) / 180;
@@ -150,8 +150,12 @@ function renderTable(rows) {
       <td>${BUILDING_LABELS[row.building_status] || row.building_status}</td>
       <td>${plss}</td>
       <td>${row.parcel_number || ""}</td>
-      <td class="actions">${propertyTableLinks(row)}</td>
+      <td class="actions link-cell">${propertyTableLinks(row)}</td>
     `;
+
+    tr.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", (event) => event.stopPropagation());
+    });
 
     tr.addEventListener("click", () => {
       if (row.lat == null || row.lon == null) return;

@@ -331,8 +331,11 @@ function renderStateTable(rows) {
       <td>${formatMoney(row.taxes_owed)}</td>
       <td>${BUILDING_LABELS[row.building_status] || row.building_status}</td>
       <td>${row.parcel_number || ""}</td>
-      <td class="actions">${propertyTableLinks(row)}</td>
+      <td class="actions link-cell">${propertyTableLinks(row)}</td>
     `;
+      tr.querySelectorAll("a").forEach((link) => {
+        link.addEventListener("click", (event) => event.stopPropagation());
+      });
       tr.addEventListener("click", () => {
         if (row.lat != null && row.lon != null) {
           stateMap.setView([row.lat, row.lon], 15);

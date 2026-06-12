@@ -215,8 +215,16 @@ button:disabled {
   line-height: 1.45;
 }
 
-td.actions {
+td.actions,
+td.link-cell {
   white-space: nowrap;
+}
+
+td.actions a,
+td.link-cell a {
+  color: #2563eb;
+  text-decoration: underline;
+  font-weight: 500;
 }
 
 #state-table th[data-sort] {
