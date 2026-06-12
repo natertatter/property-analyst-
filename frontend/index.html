@@ -30,7 +30,11 @@
           </label>
           <label>
             County keywords
-            <input id="state-county-kw" type="text" placeholder="e.g. BENTON, WASHINGTON" />
+            <input id="state-county-kw" type="text" placeholder="e.g. BENTON — loads parcels on map" />
+          </label>
+          <label>
+            Property area keywords <span class="label-hint">(when viewing county parcels)</span>
+            <input id="state-property-kw" type="text" placeholder="e.g. BELLA VISTA, ROGERS" />
           </label>
           <label>
             Auction city keywords
@@ -64,15 +68,11 @@
           </div>
           <div class="row">
             <label>
-              Map view
-              <select id="state-geo-level">
-                <option value="state">Entire state (by county)</option>
-                <option value="county">County focus</option>
-              </select>
-            </label>
-            <label id="focus-county-wrap" hidden>
               Focus county
-              <select id="state-focus-county"><option value="">Select county</option></select>
+              <select id="state-focus-county"><option value="">All counties</option></select>
+            </label>
+            <label class="checkbox-inline">
+              <input id="state-show-parcels" type="checkbox" checked /> Show sale parcels on map
             </label>
           </div>
           <button type="submit" id="state-submit-btn">Load &amp; Filter</button>
@@ -82,13 +82,16 @@
       </section>
 
       <section class="panel map-panel">
-        <h2>Geo View</h2>
+        <div class="map-header">
+          <h2 id="state-map-title">Geo View — Arkansas</h2>
+          <button type="button" id="state-back-btn" class="btn-secondary" hidden>← All counties</button>
+        </div>
         <div id="state-map"></div>
-        <p class="hint">State view groups sales by county. County focus zooms to one county and shows auction locations.</p>
+        <p class="hint">Filter to one county (or click a county marker) to load all tax sale parcels on the map. Use property area keywords to narrow parcels within the county.</p>
       </section>
 
       <section class="panel table-panel">
-        <h2>County Sales <span id="state-result-count"></span></h2>
+        <h2><span id="state-table-caption">County sales</span> <span id="state-result-count"></span></h2>
         <div class="table-wrap">
           <table id="state-table">
             <thead>

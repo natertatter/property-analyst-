@@ -98,6 +98,59 @@ def _property_to_dict(prop: ParsedProperty, geo: Optional[dict] = None) -> dict:
     return data
 
 
+async def _analyze_catalog(
+    catalog_url: str,
+    city_keywords: list[str],
+    min_acres: Optional[float],
+    max_acres: Optional[float],
+    min_taxes: Optional[float],
+    max_taxes: Optional[float],
+    building_statuses: list[str],
+    search_text: str,
+    geocode: bool,
+) -> dict:
+    meta, properties = await fetch_catalog(catalog_url)
+    active = [p for p in properties if not p.is_cancelled]
+    filtered = [
+        p
+        for p in active
+        if matches_criteria(
+            p,
+            city_keywords,
+            min_acres,
+            max_acres,
+            min_taxes,
+            max_taxes,
+            building_statuses,
+            search_text,
+        )
+    ]
+
+    geocodes = []
+    if geocode and filtered:
+        geocodes = await geocode_properties(filtered)
+
+    results = [
+        _property_to_dict(prop, geo if geocode else None)
+        for prop, geo in zip(filtered, geocodes or [None] * len(filtered))
+    ]
+
+    summary = {
+        "total_catalog_rows": len(properties),
+        "active_rows": len(active),
+        "matched_rows": len(filtered),
+        "mapped_rows": sum(1 for r in results if r.get("lat") is not None),
+        "by_building_status": {},
+        "taxes_total": round(sum(r["taxes_owed"] or 0 for r in results), 2),
+        "acres_total": round(sum(r["acres"] or 0 for r in results), 2),
+    }
+    for row in results:
+        status = row["building_status"]
+        summary["by_building_status"][status] = summary["by_building_status"].get(status, 0) + 1
+
+    return {"meta": meta, "summary": summary, "properties": results}
+
+
 @app.get("/api/health")
 async def health():
     return {"status": "ok"}
@@ -150,16 +203,8 @@ async def filter_contents(request: ContentsFilterRequest):
 @app.post("/api/analyze")
 async def analyze(request: AnalyzeRequest):
     try:
-        meta, properties = await fetch_catalog(request.catalog_url)
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-    active = [p for p in properties if not p.is_cancelled]
-    filtered = [
-        p
-        for p in active
-        if matches_criteria(
-            p,
+        result = await _analyze_catalog(
+            request.catalog_url,
             request.city_keywords,
             request.min_acres,
             request.max_acres,
@@ -167,36 +212,42 @@ async def analyze(request: AnalyzeRequest):
             request.max_taxes,
             request.building_statuses,
             request.search_text,
+            request.geocode,
         )
-    ]
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    geocodes = []
-    if request.geocode and filtered:
-        geocodes = await geocode_properties(filtered)
+    return {**result, "criteria": request.model_dump()}
 
-    results = [
-        _property_to_dict(prop, geo if request.geocode else None)
-        for prop, geo in zip(filtered, geocodes or [None] * len(filtered))
-    ]
 
-    summary = {
-        "total_catalog_rows": len(properties),
-        "active_rows": len(active),
-        "matched_rows": len(filtered),
-        "mapped_rows": sum(1 for r in results if r.get("lat") is not None),
-        "by_building_status": {},
-        "taxes_total": round(sum(r["taxes_owed"] or 0 for r in results), 2),
-        "acres_total": round(sum(r["acres"] or 0 for r in results), 2),
-    }
-    for row in results:
-        status = row["building_status"]
-        summary["by_building_status"][status] = summary["by_building_status"].get(status, 0) + 1
+@app.get("/api/catalog/map")
+async def catalog_map(
+    catalog_url: str,
+    city_keywords: str = "",
+    search_text: str = "",
+    geocode: bool = True,
+):
+    """Return geocoded catalog parcels for map display (used by state county drill-down)."""
+    keywords = [k.strip() for k in city_keywords.split(",") if k.strip()]
+    try:
+        result = await _analyze_catalog(
+            catalog_url,
+            keywords,
+            None,
+            None,
+            None,
+            None,
+            [],
+            search_text,
+            geocode,
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     return {
-        "meta": meta,
-        "criteria": request.model_dump(),
-        "summary": summary,
-        "properties": results,
+        "meta": result["meta"],
+        "summary": result["summary"],
+        "properties": result["properties"],
     }
 
 

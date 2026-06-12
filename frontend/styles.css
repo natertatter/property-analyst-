@@ -153,6 +153,45 @@ button:disabled {
   cursor: pointer;
 }
 
+.btn-secondary {
+  background: #e2e8f0;
+  color: #1e293b;
+  border: 0;
+  border-radius: 4px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.map-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.map-header h2 {
+  margin: 0;
+}
+
+.label-hint {
+  font-weight: normal;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.popup-btn {
+  margin-top: 0.5rem;
+  background: #2563eb;
+  color: #fff;
+  border: 0;
+  border-radius: 4px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
 td.actions {
   white-space: nowrap;
 }
