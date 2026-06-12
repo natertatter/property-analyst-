@@ -92,6 +92,9 @@ def _property_to_dict(prop: ParsedProperty, geo: Optional[dict] = None) -> dict:
         "location_type": prop.location_type,
         "geocode_query": prop.geocode_query,
         "is_cancelled": prop.is_cancelled,
+        "datascout_url": prop.datascout_url,
+        "cosl_parcel_url": prop.cosl_parcel_url,
+        "catalog_url": prop.catalog_url,
     }
     if geo:
         data.update(geo)

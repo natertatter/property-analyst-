@@ -31,6 +31,9 @@ class ParsedProperty:
     building_detail: str = ""
     location_type: str = "unknown"
     geocode_query: str = ""
+    datascout_url: Optional[str] = None
+    cosl_parcel_url: Optional[str] = None
+    catalog_url: Optional[str] = None
     raw: dict = field(default_factory=dict)
 
 

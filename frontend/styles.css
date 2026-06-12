@@ -192,6 +192,15 @@ button:disabled {
   cursor: pointer;
 }
 
+.popup-links {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.popup-links a {
+  color: #2563eb;
+}
+
 td.actions {
   white-space: nowrap;
 }

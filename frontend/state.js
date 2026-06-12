@@ -137,13 +137,7 @@ function statePopupCounty(county, items) {
 }
 
 function parcelPopup(row) {
-  return `
-    <strong>Sale #${row.sale_number || "?"}</strong><br/>
-    ${row.owner_name || ""}<br/>
-    ${row.city || ""} ${row.addition ? "· " + row.addition : ""}<br/>
-    ${formatAcres(row.acres)} acres · ${formatMoney(row.taxes_owed)}<br/>
-    ${BUILDING_LABELS[row.building_status] || row.building_status}
-  `;
+  return propertyPopupHtml(row, BUILDING_LABELS);
 }
 
 function renderCountyMarkers(rows) {
@@ -300,6 +294,7 @@ function setStateTableMode(mode) {
       <th>Taxes</th>
       <th>Building</th>
       <th>Parcel</th>
+      <th>Links</th>
     `;
     document.getElementById("state-table-caption").textContent = "Parcels in county";
     return;
@@ -331,15 +326,16 @@ function renderStateTable(rows) {
   if (isParcelView) {
     parcelRows.forEach((row) => {
       const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${row.sale_number || ""}</td>
-        <td>${row.owner_name || ""}</td>
-        <td>${row.city || ""}</td>
-        <td>${formatAcres(row.acres)}</td>
-        <td>${formatMoney(row.taxes_owed)}</td>
-        <td>${BUILDING_LABELS[row.building_status] || row.building_status}</td>
-        <td>${row.parcel_number || ""}</td>
-      `;
+    tr.innerHTML = `
+      <td>${row.sale_number || ""}</td>
+      <td>${row.owner_name || ""}</td>
+      <td>${row.city || ""}</td>
+      <td>${formatAcres(row.acres)}</td>
+      <td>${formatMoney(row.taxes_owed)}</td>
+      <td>${BUILDING_LABELS[row.building_status] || row.building_status}</td>
+      <td>${row.parcel_number || ""}</td>
+      <td class="actions">${propertyTableLinks(row)}</td>
+    `;
       tr.addEventListener("click", () => {
         if (row.lat != null && row.lon != null) {
           stateMap.setView([row.lat, row.lon], 15);

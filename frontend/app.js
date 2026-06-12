@@ -92,14 +92,7 @@ function renderSummary(data) {
 }
 
 function popupHtml(row) {
-  return `
-    <strong>Sale #${row.sale_number || "?"}</strong><br/>
-    ${row.owner_name || ""}<br/>
-    ${row.city || ""} ${row.addition ? "· " + row.addition : ""}<br/>
-    ${formatAcres(row.acres)} acres · ${formatMoney(row.taxes_owed)}<br/>
-    ${BUILDING_LABELS[row.building_status] || row.building_status}<br/>
-    <small>${row.geocode_label || ""}</small>
-  `;
+  return propertyPopupHtml(row, BUILDING_LABELS);
 }
 
 function jitterCoordinates(lat, lon, index, confidence) {
@@ -156,6 +149,7 @@ function renderTable(rows) {
       <td>${BUILDING_LABELS[row.building_status] || row.building_status}</td>
       <td>${plss}</td>
       <td>${row.parcel_number || ""}</td>
+      <td class="actions">${propertyTableLinks(row)}</td>
     `;
 
     tr.addEventListener("click", () => {

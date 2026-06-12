@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import urljoin, parse_qs, urlparse
 
 import httpx
 from bs4 import BeautifulSoup
@@ -12,6 +12,7 @@ from parser import ParsedProperty, parse_legal_row
 
 USER_AGENT = "PropertyAnalyst/1.0 (tax-sale prototype)"
 COSL_HOSTS = ("cosl.org", "www.cosl.org")
+COSL_BASE = "https://cosl.org"
 
 
 def _normalize_catalog_url(url: str) -> str:
@@ -58,6 +59,21 @@ def _extract_sale_meta(soup: BeautifulSoup) -> dict:
     return {"county": county, "sale_date": sale_date, "sale_location": location}
 
 
+def _extract_parcel_links(cells: list) -> tuple[Optional[str], Optional[str]]:
+    datascout_url = None
+    cosl_parcel_url = None
+
+    for cell in cells:
+        for link in cell.find_all("a", href=True):
+            href = link["href"]
+            if "datascoutpro.com" in href and not datascout_url:
+                datascout_url = href
+            elif "/WebParcels/GetParcel/" in href and not cosl_parcel_url:
+                cosl_parcel_url = urljoin(COSL_BASE, href)
+
+    return datascout_url, cosl_parcel_url
+
+
 async def fetch_catalog(url: str) -> tuple[dict, list[ParsedProperty]]:
     catalog_url = _normalize_catalog_url(url)
 
@@ -86,6 +102,7 @@ async def fetch_catalog(url: str) -> tuple[dict, list[ParsedProperty]]:
         interested_parties = cells[3].get_text(" ", strip=True)
         parcel_number = cells[4].get_text(strip=True)
         taxes = cells[5].get_text(strip=True) if len(cells) > 5 else ""
+        datascout_url, cosl_parcel_url = _extract_parcel_links(cells)
 
         if not sale_number and "CANCELLED" in owner_name.upper():
             properties.append(
@@ -105,6 +122,9 @@ async def fetch_catalog(url: str) -> tuple[dict, list[ParsedProperty]]:
             parcel_number,
             taxes,
         )
+        prop.datascout_url = datascout_url
+        prop.cosl_parcel_url = cosl_parcel_url
+        prop.catalog_url = catalog_url
         properties.append(prop)
 
     meta["source_url"] = catalog_url
