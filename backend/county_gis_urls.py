@@ -2,16 +2,11 @@
 
 from __future__ import annotations
 
-import re
 from urllib.parse import quote
 
+from county_geocoder import normalize_county_key
+
 BENTON_PARCELS_URL = "https://gis.bentoncountyar.gov/parcels/index.html"
-
-
-def _normalize_county_key(county: str) -> str:
-    name = (county or "").upper().strip()
-    name = re.sub(r"\s+COUNTY\s*$", "", name).strip()
-    return re.sub(r"[^A-Z]", "", name)
 
 
 def benton_county_gis_url(parcel_number: str) -> str:
@@ -29,7 +24,7 @@ COUNTY_GIS_URL_BUILDERS = {
 def get_county_gis_url(county: str | None, parcel_number: str | None) -> str | None:
     if not county or not parcel_number:
         return None
-    builder = COUNTY_GIS_URL_BUILDERS.get(_normalize_county_key(county))
+    builder = COUNTY_GIS_URL_BUILDERS.get(normalize_county_key(county))
     if not builder:
         return None
     return builder(parcel_number.strip())

@@ -11,8 +11,15 @@ DATA_FILE = Path(__file__).resolve().parent / "data" / "county_centroids.json"
 AUCTION_CITIES_FILE = Path(__file__).resolve().parent / "data" / "auction_cities.json"
 
 
+def normalize_county_key(name: str) -> str:
+    """Normalize catalog/county labels like 'BENTON County' to centroid keys."""
+    cleaned = (name or "").upper().strip()
+    cleaned = re.sub(r"\s+COUNTY\s*$", "", cleaned).strip()
+    return re.sub(r"[^A-Z]", "", cleaned)
+
+
 def normalize_county_name(name: str) -> str:
-    return re.sub(r"[^A-Z]", "", (name or "").upper())
+    return normalize_county_key(name)
 
 
 @lru_cache(maxsize=1)

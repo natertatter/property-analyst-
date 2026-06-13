@@ -2,12 +2,16 @@ function getCoslPropertyUrl(row) {
   return row.cosl_property_url || row.cosl_parcel_url || row.catalog_url || null;
 }
 
+function getParcelDetailUrl(row) {
+  return row.parcel_detail_url || null;
+}
+
 function getCountyGisUrl(row) {
   return row.county_gis_url || null;
 }
 
 function getPrimaryPropertyUrl(row) {
-  return getCountyGisUrl(row) || getCoslPropertyUrl(row);
+  return getParcelDetailUrl(row) || getCountyGisUrl(row) || getCoslPropertyUrl(row);
 }
 
 function countyGisLabel(row) {
@@ -21,10 +25,16 @@ function externalLink(url, label) {
 }
 
 function propertyPopupLinks(row) {
+  const parcelDetailUrl = getParcelDetailUrl(row);
   const countyGisUrl = getCountyGisUrl(row);
   const coslUrl = getCoslPropertyUrl(row);
   const links = [];
 
+  if (parcelDetailUrl) {
+    links.push(
+      `<a class="popup-btn popup-btn-cosl" href="${parcelDetailUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">View parcel details</a>`
+    );
+  }
   if (countyGisUrl) {
     links.push(
       `<a class="popup-btn popup-btn-cosl" href="${countyGisUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">View on ${countyGisLabel(row)}</a>`
@@ -47,9 +57,13 @@ function propertyPopupLinks(row) {
 }
 
 function propertyTableLinks(row) {
+  const parcelDetailUrl = getParcelDetailUrl(row);
   const countyGisUrl = getCountyGisUrl(row);
   const coslUrl = getCoslPropertyUrl(row);
   const parts = [];
+  if (parcelDetailUrl) {
+    parts.push(`<a href="${parcelDetailUrl}" target="_blank" rel="noopener noreferrer">Parcel</a>`);
+  }
   if (countyGisUrl) {
     parts.push(`<a href="${countyGisUrl}" target="_blank" rel="noopener noreferrer">GIS</a>`);
   }
