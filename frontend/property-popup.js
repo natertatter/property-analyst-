@@ -2,15 +2,34 @@ function getCoslPropertyUrl(row) {
   return row.cosl_property_url || row.cosl_parcel_url || row.catalog_url || null;
 }
 
+function getCountyGisUrl(row) {
+  return row.county_gis_url || null;
+}
+
+function getPrimaryPropertyUrl(row) {
+  return getCountyGisUrl(row) || getCoslPropertyUrl(row);
+}
+
+function countyGisLabel(row) {
+  const county = (row.county || "").replace(/\s+county$/i, "").trim();
+  return county ? `${county} County GIS` : "County GIS";
+}
+
 function externalLink(url, label) {
   if (!url) return "";
   return `<a href="${url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">${label}</a>`;
 }
 
 function propertyPopupLinks(row) {
+  const countyGisUrl = getCountyGisUrl(row);
   const coslUrl = getCoslPropertyUrl(row);
   const links = [];
 
+  if (countyGisUrl) {
+    links.push(
+      `<a class="popup-btn popup-btn-cosl" href="${countyGisUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">View on ${countyGisLabel(row)}</a>`
+    );
+  }
   if (coslUrl) {
     links.push(
       `<a class="popup-btn popup-btn-cosl" href="${coslUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">View property on COSL</a>`
@@ -28,8 +47,12 @@ function propertyPopupLinks(row) {
 }
 
 function propertyTableLinks(row) {
+  const countyGisUrl = getCountyGisUrl(row);
   const coslUrl = getCoslPropertyUrl(row);
   const parts = [];
+  if (countyGisUrl) {
+    parts.push(`<a href="${countyGisUrl}" target="_blank" rel="noopener noreferrer">GIS</a>`);
+  }
   if (coslUrl) {
     parts.push(`<a href="${coslUrl}" target="_blank" rel="noopener noreferrer">COSL</a>`);
   }
@@ -51,10 +74,10 @@ function propertyPopupHtml(row, buildingLabels) {
       ? "—"
       : `$${row.taxes_owed.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const acres = row.acres == null ? "—" : row.acres.toFixed(2);
-  const coslUrl = getCoslPropertyUrl(row);
+  const primaryUrl = getPrimaryPropertyUrl(row);
   const parcelLabel = row.parcel_number || "—";
-  const parcelHtml = coslUrl
-    ? externalLink(coslUrl, `Parcel ${parcelLabel}`)
+  const parcelHtml = primaryUrl
+    ? externalLink(primaryUrl, `Parcel ${parcelLabel}`)
     : `Parcel ${parcelLabel}`;
   const saveBtn = typeof SavedProperties !== "undefined" ? SavedProperties.saveButtonHtml(row) : "";
 

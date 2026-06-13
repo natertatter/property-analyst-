@@ -123,6 +123,7 @@ async def fetch_catalog(url: str) -> tuple[dict, list[ParsedProperty]]:
             parcel_number,
             taxes,
         )
+        prop.county = meta.get("county")
         prop.datascout_url = datascout_url
         prop.cosl_parcel_url = cosl_parcel_url
         prop.catalog_url = catalog_url

@@ -31,6 +31,7 @@ class ParsedProperty:
     building_detail: str = ""
     location_type: str = "unknown"
     geocode_query: str = ""
+    county: Optional[str] = None
     datascout_url: Optional[str] = None
     cosl_parcel_url: Optional[str] = None
     catalog_url: Optional[str] = None

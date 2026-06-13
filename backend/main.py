@@ -19,6 +19,7 @@ from contents_scraper import (
     sort_entries,
 )
 from county_geocoder import all_county_centroids
+from county_gis_urls import get_county_gis_url
 from geocoder import geocode_properties
 from parser import ParsedProperty, matches_criteria
 from scraper import fetch_catalog
@@ -73,11 +74,13 @@ class AnalyzeRequest(BaseModel):
 
 def _property_to_dict(prop: ParsedProperty, geo: Optional[dict] = None) -> dict:
     cosl_property_url = prop.cosl_parcel_url or prop.catalog_url
+    county_gis_url = get_county_gis_url(prop.county, prop.parcel_number)
     data = {
         "sale_number": prop.sale_number,
         "owner_name": prop.owner_name,
         "legal_description": prop.legal_description,
         "interested_parties": prop.interested_parties,
+        "county": prop.county,
         "parcel_number": prop.parcel_number,
         "taxes_owed": prop.taxes_owed,
         "acres": prop.acres,
@@ -97,6 +100,7 @@ def _property_to_dict(prop: ParsedProperty, geo: Optional[dict] = None) -> dict:
         "cosl_parcel_url": prop.cosl_parcel_url,
         "catalog_url": prop.catalog_url,
         "cosl_property_url": cosl_property_url,
+        "county_gis_url": county_gis_url,
     }
     if geo:
         data.update(geo)
