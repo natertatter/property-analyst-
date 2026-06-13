@@ -14,6 +14,7 @@
     <nav class="tabs" role="tablist">
       <button id="tab-state" class="tab active" role="tab" aria-selected="true">State Overview</button>
       <button id="tab-catalog" class="tab" role="tab" aria-selected="false">Catalog Analyzer</button>
+      <span id="saved-count-badge" class="saved-badge" hidden></span>
     </nav>
   </header>
 
@@ -74,6 +75,9 @@
             <label class="checkbox-inline">
               <input id="state-show-parcels" type="checkbox" checked /> Show sale parcels on map
             </label>
+            <label class="checkbox-inline">
+              <input id="state-saved-only" type="checkbox" /> Saved properties only
+            </label>
           </div>
           <button type="submit" id="state-submit-btn">Load &amp; Filter</button>
         </form>
@@ -87,7 +91,7 @@
           <button type="button" id="state-back-btn" class="btn-secondary" hidden>← All counties</button>
         </div>
         <div id="state-map"></div>
-        <p class="hint">Filter to one county (or click a county marker) to load all tax sale parcels on the map. Use property area keywords to narrow parcels within the county.</p>
+        <p class="hint">Filter to one county to load parcels. Gold markers = saved for later.</p>
       </section>
 
       <section class="panel table-panel">
@@ -149,6 +153,9 @@
           <label class="checkbox-inline">
             <input id="geocode" type="checkbox" checked /> Geocode results on map
           </label>
+          <label class="checkbox-inline">
+            <input id="saved-only" type="checkbox" /> Saved properties only
+          </label>
           <button type="submit" id="submit-btn">Analyze Catalog</button>
         </form>
         <p id="status" class="status"></p>
@@ -162,7 +169,7 @@
       <section class="panel map-panel">
         <h2>Parcel Map</h2>
         <div id="map"></div>
-        <p class="hint">Markers use PLSS section centroids or address geocoding.</p>
+        <p class="hint">Gold markers = saved for later. Click a marker to save or unsave from the popup.</p>
       </section>
 
       <section class="panel table-panel">
@@ -171,6 +178,7 @@
           <table id="results-table">
             <thead>
               <tr>
+                <th></th>
                 <th>Sale #</th>
                 <th>Owner</th>
                 <th>City</th>
@@ -190,8 +198,9 @@
   </main>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="/static/property-popup.js?v=3"></script>
-  <script src="/static/state.js?v=3"></script>
-  <script src="/static/app.js?v=3"></script>
+  <script src="/static/saved-properties.js?v=4"></script>
+  <script src="/static/property-popup.js?v=4"></script>
+  <script src="/static/state.js?v=4"></script>
+  <script src="/static/app.js?v=4"></script>
 </body>
 </html>

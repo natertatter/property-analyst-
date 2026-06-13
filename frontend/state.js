@@ -1,4 +1,5 @@
 const stateMap = L.map("state-map").setView([34.75, -92.5], 7);
+window.stateMap = stateMap;
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors",
 }).addTo(stateMap);
@@ -120,6 +121,7 @@ function renderStateSummary(rows) {
     <div class="summary-card"><span>Counties</span><strong>${getUniqueCounties(rows).length}</strong></div>
     <div class="summary-card"><span>Sale dates</span><strong>${new Set(rows.map((r) => r.sale_date)).size}</strong></div>
     ${parcelNote}
+    <div class="summary-card"><span>Saved</span><strong>${SavedProperties.count()}</strong></div>
   `;
 }
 
@@ -164,18 +166,24 @@ function renderCountyMarkers(rows) {
   return bounds;
 }
 
+function filterParcelRows(rows) {
+  if (!document.getElementById("state-saved-only").checked) return rows;
+  return rows.filter((row) => SavedProperties.isSaved(row));
+}
+
 function renderParcelMarkers(rows) {
   const bounds = [];
-  rows.forEach((row) => {
+  const displayRows = filterParcelRows(rows);
+  displayRows.forEach((row) => {
     if (row.lat == null || row.lon == null) return;
-    const marker = L.circleMarker([row.lat, row.lon], {
+    const baseStyle = {
       radius: 5,
       color: "#7c3aed",
       fillColor: "#8b5cf6",
       fillOpacity: 0.85,
       weight: 1,
-    });
-    bindPropertyPopup(marker, row, BUILDING_LABELS);
+    };
+    const marker = createPropertyMarker(row.lat, row.lon, row, BUILDING_LABELS, baseStyle);
     stateParcels.addLayer(marker);
     bounds.push([row.lat, row.lon]);
   });
@@ -284,6 +292,7 @@ function setStateTableMode(mode) {
   const thead = document.querySelector("#state-table thead tr");
   if (mode === "parcels") {
     thead.innerHTML = `
+      <th></th>
       <th>Sale #</th>
       <th>Owner</th>
       <th>City</th>
@@ -321,9 +330,12 @@ function renderStateTable(rows) {
   setStateTableMode(isParcelView ? "parcels" : "counties");
 
   if (isParcelView) {
-    parcelRows.forEach((row) => {
+    const displayRows = filterParcelRows(parcelRows);
+    displayRows.forEach((row) => {
       const tr = document.createElement("tr");
+      if (SavedProperties.isSaved(row)) tr.classList.add("saved-row");
     tr.innerHTML = `
+      <td class="pin-cell">${SavedProperties.tablePinButton(row)}</td>
       <td>${row.sale_number || ""}</td>
       <td>${row.owner_name || ""}</td>
       <td>${row.city || ""}</td>
@@ -333,6 +345,7 @@ function renderStateTable(rows) {
       <td>${row.parcel_number || ""}</td>
       <td class="actions link-cell">${propertyTableLinks(row)}</td>
     `;
+      SavedProperties.bindTablePinButtons(tr);
       tr.querySelectorAll("a").forEach((link) => {
         link.addEventListener("click", (event) => event.stopPropagation());
       });
@@ -343,7 +356,7 @@ function renderStateTable(rows) {
       });
       tbody.appendChild(tr);
     });
-    document.getElementById("state-result-count").textContent = `(${parcelRows.length})`;
+    document.getElementById("state-result-count").textContent = `(${displayRows.length})`;
     return;
   }
 
@@ -429,6 +442,21 @@ async function loadStateContents(event) {
 document.getElementById("state-form").addEventListener("submit", loadStateContents);
 document.getElementById("state-back-btn").addEventListener("click", exitCountyDrill);
 document.getElementById("state-show-parcels").addEventListener("change", () => refreshStateView());
+document.getElementById("state-saved-only").addEventListener("change", () => {
+  if (parcelRows.length || stateRows.length) refreshStateView();
+});
+
+document.addEventListener("saved-properties-changed", () => {
+  if (!parcelRows.length && !stateRows.length) return;
+  renderStateTable(stateRows);
+  if (document.getElementById("state-saved-only").checked) {
+    renderStateMap(stateRows);
+  } else {
+    SavedProperties.refreshMarkerStyles(stateParcels);
+    SavedProperties.refreshOpenPopups();
+  }
+});
+
 document.getElementById("state-focus-county").addEventListener("change", async (event) => {
   drilledCounty = event.target.value || null;
   await refreshStateView();

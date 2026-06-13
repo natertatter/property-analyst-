@@ -30,6 +30,18 @@ header p {
 .tabs {
   display: flex;
   gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.saved-badge {
+  margin-left: auto;
+  background: #f59e0b;
+  color: #1f2937;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
 }
 
 .tab {
@@ -181,15 +193,41 @@ button:disabled {
   font-size: 0.8rem;
 }
 
-.popup-btn {
+.popup-btn-save {
+  display: block;
+  width: 100%;
   margin-top: 0.5rem;
-  background: #2563eb;
-  color: #fff;
-  border: 0;
-  border-radius: 4px;
-  padding: 0.35rem 0.6rem;
-  font-size: 0.8rem;
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.popup-btn-save.is-saved {
+  background: #f59e0b;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.pin-btn {
+  background: none;
+  border: none;
   cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0.1rem 0.25rem;
+  color: #94a3b8;
+}
+
+.pin-btn.is-saved {
+  color: #f59e0b;
+}
+
+.pin-cell {
+  width: 2rem;
+  text-align: center;
+}
+
+tr.saved-row {
+  background: #fffbeb;
 }
 
 .popup-links {
@@ -203,11 +241,22 @@ button:disabled {
   color: #2563eb;
 }
 
+.popup-btn {
+  margin-top: 0.5rem;
+  background: #2563eb;
+  color: #fff;
+  border: 0;
+  border-radius: 4px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+
 .popup-btn-cosl {
   display: inline-block;
   text-align: center;
   text-decoration: none !important;
-  margin-top: 0.25rem;
 }
 
 .property-popup {

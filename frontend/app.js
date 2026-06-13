@@ -19,6 +19,7 @@ document.getElementById("tab-catalog").addEventListener("click", () => {
 });
 
 const map = L.map("map").setView([36.48, -94.28], 12);
+window.map = map;
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors",
 }).addTo(map);
@@ -81,6 +82,7 @@ function renderSummary(data) {
       <div class="summary-card"><span>On map</span><strong>${s.mapped_rows}</strong></div>
       <div class="summary-card"><span>Total taxes</span><strong>${formatMoney(s.taxes_total)}</strong></div>
       <div class="summary-card"><span>Total acres</span><strong>${formatAcres(s.acres_total)}</strong></div>
+      <div class="summary-card"><span>Saved</span><strong>${SavedProperties.count()}</strong></div>
     </div>
     <p style="margin-top:0.75rem;font-size:0.9rem;">
       By type:
@@ -102,9 +104,15 @@ function jitterCoordinates(lat, lon, index, confidence) {
   return [lat + Math.sin(angle) * spread, lon + Math.cos(angle) * spread];
 }
 
+function filterRowsForDisplay(rows) {
+  if (!document.getElementById("saved-only").checked) return rows;
+  return rows.filter((row) => SavedProperties.isSaved(row));
+}
+
 function renderMap(rows) {
   markersLayer.clearLayers();
-  const mappable = rows.filter((r) => r.lat != null && r.lon != null);
+  const displayRows = filterRowsForDisplay(rows);
+  const mappable = displayRows.filter((r) => r.lat != null && r.lon != null);
   if (!mappable.length) {
     map.setView([36.48, -94.28], 11);
     return;
@@ -114,14 +122,14 @@ function renderMap(rows) {
   mappable.forEach((row, index) => {
     const confidence = row.geocode_confidence || "low";
     const [lat, lon] = jitterCoordinates(row.lat, row.lon, index, confidence);
-    const marker = L.circleMarker([lat, lon], {
+    const baseStyle = {
       radius: 7,
       color: CONFIDENCE_COLORS[confidence] || "#333",
       fillColor: CONFIDENCE_COLORS[confidence] || "#333",
       fillOpacity: 0.75,
       weight: 2,
-    });
-    bindPropertyPopup(marker, row, BUILDING_LABELS);
+    };
+    const marker = createPropertyMarker(lat, lon, row, BUILDING_LABELS, baseStyle);
     markersLayer.addLayer(marker);
     bounds.push([lat, lon]);
   });
@@ -131,17 +139,20 @@ function renderMap(rows) {
 
 function renderTable(rows) {
   const tbody = document.querySelector("#results-table tbody");
-  document.getElementById("result-count").textContent = `(${rows.length})`;
+  const displayRows = filterRowsForDisplay(rows);
+  document.getElementById("result-count").textContent = `(${displayRows.length})`;
   tbody.innerHTML = "";
 
-  rows.forEach((row, index) => {
+  displayRows.forEach((row, index) => {
     const tr = document.createElement("tr");
+    if (SavedProperties.isSaved(row)) tr.classList.add("saved-row");
     const plss =
       row.section && row.township && row.range
         ? `S${row.section} T${row.township} R${row.range}`
         : "—";
 
     tr.innerHTML = `
+      <td class="pin-cell">${SavedProperties.tablePinButton(row)}</td>
       <td>${row.sale_number || ""}</td>
       <td>${row.owner_name || ""}</td>
       <td>${row.city || ""}</td>
@@ -153,6 +164,7 @@ function renderTable(rows) {
       <td class="actions link-cell">${propertyTableLinks(row)}</td>
     `;
 
+    SavedProperties.bindTablePinButtons(tr);
     tr.querySelectorAll("a").forEach((link) => {
       link.addEventListener("click", (event) => event.stopPropagation());
     });
@@ -172,6 +184,24 @@ function renderTable(rows) {
     tbody.appendChild(tr);
   });
 }
+
+document.getElementById("saved-only").addEventListener("change", () => {
+  if (currentRows.length) {
+    renderTable(currentRows);
+    renderMap(currentRows);
+  }
+});
+
+document.addEventListener("saved-properties-changed", () => {
+  if (!currentRows.length) return;
+  renderTable(currentRows);
+  if (document.getElementById("saved-only").checked) {
+    renderMap(currentRows);
+  } else {
+    SavedProperties.refreshMarkerStyles(markersLayer);
+    SavedProperties.refreshOpenPopups();
+  }
+});
 
 document.getElementById("analyze-form").addEventListener("submit", async (event) => {
   event.preventDefault();

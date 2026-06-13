@@ -56,6 +56,7 @@ function propertyPopupHtml(row, buildingLabels) {
   const parcelHtml = coslUrl
     ? externalLink(coslUrl, `Parcel ${parcelLabel}`)
     : `Parcel ${parcelLabel}`;
+  const saveBtn = typeof SavedProperties !== "undefined" ? SavedProperties.saveButtonHtml(row) : "";
 
   return `
     <div class="property-popup">
@@ -66,11 +67,24 @@ function propertyPopupHtml(row, buildingLabels) {
       ${acres} acres · ${money}<br/>
       ${labels[row.building_status] || row.building_status}<br/>
       ${row.geocode_label ? `<small>${row.geocode_label}</small><br/>` : ""}
+      ${saveBtn}
       ${propertyPopupLinks(row)}
     </div>
   `;
 }
 
-function bindPropertyPopup(marker, row, buildingLabels) {
+function bindPropertyPopup(marker, row, buildingLabels, baseStyle) {
+  SavedProperties.registerRow(row);
+  marker._propertyRow = row;
+  marker._buildingLabels = buildingLabels;
+  marker._baseStyle = baseStyle;
+  marker._propertyId = SavedProperties.getPropertyId(row);
   marker.bindPopup(propertyPopupHtml(row, buildingLabels), { maxWidth: 320, minWidth: 220 });
+}
+
+function createPropertyMarker(lat, lon, row, buildingLabels, baseStyle) {
+  const style = SavedProperties.getMarkerStyle(row, baseStyle);
+  const marker = L.circleMarker([lat, lon], style);
+  bindPropertyPopup(marker, row, buildingLabels, baseStyle);
+  return marker;
 }
