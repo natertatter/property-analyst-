@@ -278,10 +278,27 @@ td.link-cell a {
 
 #state-table th[data-sort] {
   cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
 }
 
 #state-table th[data-sort]:hover {
   background: #eef2ff;
+}
+
+#state-table th[data-sort].sorted-asc::after,
+#state-table th[data-sort].sorted-desc::after {
+  font-size: 0.7rem;
+  margin-left: 0.25rem;
+  color: #4338ca;
+}
+
+#state-table th[data-sort].sorted-asc::after {
+  content: "▲";
+}
+
+#state-table th[data-sort].sorted-desc::after {
+  content: "▼";
 }
 
 .hint {

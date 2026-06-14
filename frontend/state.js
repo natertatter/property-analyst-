@@ -10,6 +10,18 @@ let stateRows = [];
 let stateAllRows = [];
 let parcelRows = [];
 let drilledCounty = null;
+let parcelSortBy = "sale_number";
+let parcelSortDir = "asc";
+
+const PARCEL_SORT_FIELDS = {
+  sale_number: { key: "sale_number", type: "number" },
+  owner_name: { key: "owner_name", type: "string" },
+  city: { key: "city", type: "string" },
+  acres: { key: "acres", type: "number" },
+  taxes_owed: { key: "taxes_owed", type: "number" },
+  building_status: { key: "building_status", type: "string" },
+  parcel_number: { key: "parcel_number", type: "string" },
+};
 
 const BUILDING_LABELS = {
   platted_lot: "Platted lot",
@@ -56,6 +68,64 @@ function getParcelTargetCounty(rows) {
   if (drilledCounty) return drilledCounty;
   const counties = getUniqueCounties(rows);
   return counties.length === 1 ? counties[0] : null;
+}
+
+function compareSortValues(a, b, type, reverse) {
+  if (type === "number") {
+    const av = a == null ? (reverse ? -Infinity : Infinity) : Number(a);
+    const bv = b == null ? (reverse ? -Infinity : Infinity) : Number(b);
+    return reverse ? bv - av : av - bv;
+  }
+  const av = String(a ?? "");
+  const bv = String(b ?? "");
+  return reverse ? bv.localeCompare(av) : av.localeCompare(bv);
+}
+
+function sortParcelRows(rows) {
+  const config = PARCEL_SORT_FIELDS[parcelSortBy];
+  if (!config) return rows;
+  const reverse = parcelSortDir === "desc";
+  return [...rows].sort((a, b) =>
+    compareSortValues(a[config.key], b[config.key], config.type, reverse)
+  );
+}
+
+function markSortedHeaders(thead, sortBy, sortDir) {
+  thead.querySelectorAll("th[data-sort]").forEach((th) => {
+    th.classList.remove("sorted-asc", "sorted-desc");
+    if (th.dataset.sort === sortBy) {
+      th.classList.add(sortDir === "desc" ? "sorted-desc" : "sorted-asc");
+    }
+  });
+}
+
+function bindSortableHeaders(thead, mode) {
+  thead.querySelectorAll("th[data-sort]").forEach((th) => {
+    th.addEventListener("click", () => {
+      const column = th.dataset.sort;
+      if (mode === "parcels") {
+        if (parcelSortBy === column) {
+          parcelSortDir = parcelSortDir === "asc" ? "desc" : "asc";
+        } else {
+          parcelSortBy = column;
+          parcelSortDir = "asc";
+        }
+        markSortedHeaders(thead, parcelSortBy, parcelSortDir);
+        renderStateTable(stateRows);
+        return;
+      }
+
+      const sortByEl = document.getElementById("state-sort-by");
+      const sortDirEl = document.getElementById("state-sort-dir");
+      if (sortByEl.value === column) {
+        sortDirEl.value = sortDirEl.value === "asc" ? "desc" : "asc";
+      } else {
+        sortByEl.value = column;
+        sortDirEl.value = "asc";
+      }
+      refreshStateView();
+    });
+  });
 }
 
 function applyClientFilters(rows) {
@@ -293,16 +363,18 @@ function setStateTableMode(mode) {
   if (mode === "parcels") {
     thead.innerHTML = `
       <th></th>
-      <th>Sale #</th>
-      <th>Owner</th>
-      <th>City</th>
-      <th>Acres</th>
-      <th>Taxes</th>
-      <th>Building</th>
-      <th>Parcel</th>
+      <th data-sort="sale_number">Sale #</th>
+      <th data-sort="owner_name">Owner</th>
+      <th data-sort="city">City</th>
+      <th data-sort="acres">Acres</th>
+      <th data-sort="taxes_owed">Taxes</th>
+      <th data-sort="building_status">Building</th>
+      <th data-sort="parcel_number">Parcel</th>
       <th>Links</th>
     `;
     document.getElementById("state-table-caption").textContent = "Parcels in county";
+    markSortedHeaders(thead, parcelSortBy, parcelSortDir);
+    bindSortableHeaders(thead, "parcels");
     return;
   }
   thead.innerHTML = `
@@ -313,12 +385,10 @@ function setStateTableMode(mode) {
     <th>Actions</th>
   `;
   document.getElementById("state-table-caption").textContent = "County sales";
-  thead.querySelectorAll("th[data-sort]").forEach((th) => {
-    th.addEventListener("click", () => {
-      document.getElementById("state-sort-by").value = th.dataset.sort;
-      refreshStateView();
-    });
-  });
+  const sortBy = document.getElementById("state-sort-by").value;
+  const sortDir = document.getElementById("state-sort-dir").value;
+  markSortedHeaders(thead, sortBy, sortDir);
+  bindSortableHeaders(thead, "counties");
 }
 
 function renderStateTable(rows) {
@@ -330,7 +400,7 @@ function renderStateTable(rows) {
   setStateTableMode(isParcelView ? "parcels" : "counties");
 
   if (isParcelView) {
-    const displayRows = filterParcelRows(parcelRows);
+    const displayRows = sortParcelRows(filterParcelRows(parcelRows));
     displayRows.forEach((row) => {
       const tr = document.createElement("tr");
       if (SavedProperties.isSaved(row)) tr.classList.add("saved-row");
@@ -478,13 +548,6 @@ let filterTimer;
 ["state-sort-by", "state-sort-dir"].forEach((id) => {
   document.getElementById(id).addEventListener("change", () => {
     if (stateAllRows.length) refreshStateView();
-  });
-});
-
-document.querySelectorAll("#state-table th[data-sort]").forEach((th) => {
-  th.addEventListener("click", () => {
-    document.getElementById("state-sort-by").value = th.dataset.sort;
-    refreshStateView();
   });
 });
 
