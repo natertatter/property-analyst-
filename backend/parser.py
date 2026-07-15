@@ -32,6 +32,12 @@ class ParsedProperty:
     location_type: str = "unknown"
     geocode_query: str = ""
     county: Optional[str] = None
+    property_source: Optional[str] = None
+    source_label: Optional[str] = None
+    source_url: Optional[str] = None
+    min_bid: Optional[float] = None
+    appraised_value: Optional[float] = None
+    list_number: Optional[int] = None
     datascout_url: Optional[str] = None
     cosl_parcel_url: Optional[str] = None
     catalog_url: Optional[str] = None

@@ -1,0 +1,29 @@
+{
+  "source": "lotsofbellavista.com",
+  "source_url": "https://lotsofbellavista.com",
+  "source_label": "Lots of Bella Vista",
+  "county": "BENTON County",
+  "city": "BELLA VISTA",
+  "properties": [
+    { "list_number": 1, "legal_description": "Lot 16, Block 7, Leicester", "parcel_number": "16-19236-000", "min_bid": 2000, "appraised_value": 8000 },
+    { "list_number": 2, "legal_description": "Lot 2, Block 7, Suffolk", "parcel_number": "16-29806-000", "min_bid": 1900, "appraised_value": 8000 },
+    { "list_number": 3, "legal_description": "Lot 14, Block 4, Evanton", "parcel_number": "16-12201-000", "min_bid": 1500, "appraised_value": 8000 },
+    { "list_number": 4, "legal_description": "Lot 15, Block 2, Dover", "parcel_number": "16-10510-000", "min_bid": 1600, "appraised_value": 8000 },
+    { "list_number": 5, "legal_description": "Lot 16, Block 2, Dover", "parcel_number": "16-10511-000", "min_bid": 2600, "appraised_value": 8000 },
+    { "list_number": 6, "legal_description": "Lot 29, Block 1, Wandsworth", "parcel_number": "16-31104-000", "min_bid": 2400, "appraised_value": 8000 },
+    { "list_number": 7, "legal_description": "Lot 5, Block 2, Armitage", "parcel_number": "16-01903-000", "min_bid": 2300, "appraised_value": 8000 },
+    { "list_number": 8, "legal_description": "Lot 14, Block 5, Wendron", "parcel_number": "16-31742-000", "min_bid": 2500, "appraised_value": 8000 },
+    { "list_number": 9, "legal_description": "Lot 12, Block 4, Kinloch", "parcel_number": "16-17531-000", "min_bid": 2300, "appraised_value": 8000 },
+    { "list_number": 10, "legal_description": "Lot 9, Block 6, Chelmsworth", "parcel_number": "16-07978-000", "min_bid": 2200, "appraised_value": 8000 },
+    { "list_number": 11, "legal_description": "Lot 2, Block 11, Buckingham", "parcel_number": "16-06007-000", "min_bid": 1600, "appraised_value": 8000 },
+    { "list_number": 12, "legal_description": "Lot 7, Block 1, Dumfries", "parcel_number": "16-10591-000", "min_bid": 2300, "appraised_value": 8000 },
+    { "list_number": 13, "legal_description": "Lot 14, Block 4, Queensborough", "parcel_number": "16-25129-000", "min_bid": 2500, "appraised_value": 8000 },
+    { "list_number": 14, "legal_description": "Lot 13, Block 2, Ingleborough", "parcel_number": "16-15504-000", "min_bid": 1300, "appraised_value": 8000 },
+    { "list_number": 15, "legal_description": "Lot 16, Block 5, Melanie", "parcel_number": "16-20932-000", "min_bid": 2300, "appraised_value": 8000 },
+    { "list_number": 16, "legal_description": "Lot 2, Block 6, Padbury", "parcel_number": "16-23994-000", "min_bid": 2300, "appraised_value": 8000 },
+    { "list_number": 17, "legal_description": "Lot 3, Block 4, Harlow", "parcel_number": "16-14033-000", "min_bid": 2400, "appraised_value": 8000 },
+    { "list_number": 18, "legal_description": "Lot 6, Block 6, Sherlock", "parcel_number": "16-28023-000", "min_bid": 2300, "appraised_value": 8000 },
+    { "list_number": 19, "legal_description": "Lot 1, Block 5, Cargill", "parcel_number": "16-07035-000", "min_bid": 1200, "appraised_value": 8000 },
+    { "list_number": 20, "legal_description": "Lot 31, Block 2, Dunvegan", "parcel_number": "16-10939-000", "min_bid": 2400, "appraised_value": 8000 }
+  ]
+}

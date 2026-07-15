@@ -94,14 +94,22 @@ function propertyPopupHtml(row, buildingLabels) {
     ? externalLink(primaryUrl, `Parcel ${parcelLabel}`)
     : `Parcel ${parcelLabel}`;
   const saveBtn = typeof SavedProperties !== "undefined" ? SavedProperties.saveButtonHtml(row) : "";
+  const sourceTag = typeof sourceTagHtml !== "undefined" ? sourceTagHtml(row) : "";
+  const title = isLotsOfBellaVista(row)
+    ? `Listing #${row.list_number || "?"}`
+    : `Sale #${row.sale_number || "?"}`;
+  const pricingLine = isLotsOfBellaVista(row)
+    ? `Min bid ${formatBidMoney(row.min_bid)} · Appraised ${formatBidMoney(row.appraised_value)}`
+    : `${acres} acres · ${money}`;
 
   return `
     <div class="property-popup">
-      <strong>Sale #${row.sale_number || "?"}</strong><br/>
-      ${row.owner_name || ""}<br/>
+      ${sourceTag ? `<div class="popup-source">${sourceTag}</div>` : ""}
+      <strong>${title}</strong><br/>
+      ${row.owner_name || row.legal_description || ""}<br/>
       ${row.city || ""} ${row.addition ? "· " + row.addition : ""}<br/>
       ${parcelHtml}<br/>
-      ${acres} acres · ${money}<br/>
+      ${pricingLine}<br/>
       ${labels[row.building_status] || row.building_status}<br/>
       ${row.geocode_label ? `<small>${row.geocode_label}</small><br/>` : ""}
       ${saveBtn}
@@ -120,8 +128,9 @@ function bindPropertyPopup(marker, row, buildingLabels, baseStyle) {
 }
 
 function createPropertyMarker(lat, lon, row, buildingLabels, baseStyle) {
-  const style = SavedProperties.getMarkerStyle(row, baseStyle);
+  const resolvedStyle = getPropertyMarkerStyle(row, baseStyle);
+  const style = SavedProperties.getMarkerStyle(row, resolvedStyle);
   const marker = L.circleMarker([lat, lon], style);
-  bindPropertyPopup(marker, row, buildingLabels, baseStyle);
+  bindPropertyPopup(marker, row, buildingLabels, resolvedStyle);
   return marker;
 }

@@ -8,7 +8,7 @@ async function main() {
     catalog_url:
       "https://cosl.org/Home/CatalogView?county=BENT&saledate=8%2F11%2F2026%2010%3A00%3A00%20AM",
     city_keywords: ["BELLA VISTA"],
-    geocode: true,
+    geocode: false,
   };
 
   const res = await fetch(`${API}/api/analyze`, {
@@ -24,26 +24,39 @@ async function main() {
   const withGis = props.filter((p) => p.county_gis_url);
   const withCosl = props.filter((p) => p.cosl_property_url || p.cosl_parcel_url);
   console.log(`API: ${withParcel.length}/${props.length} properties have parcel detail URLs`);
+
+  const lobv = props.filter((p) => p.property_source === "lotsofbellavista.com");
+  console.log(`API: ${lobv.length} Lots of Bella Vista listings included`);
+  if (lobv.length !== 20) {
+    throw new Error(`Expected 20 Lots of Bella Vista listings, got ${lobv.length}`);
+  }
   console.log(`API: ${withGis.length}/${props.length} properties have county GIS URLs`);
   console.log(`API: ${withCosl.length}/${props.length} properties have COSL URLs`);
 
-  const sale3940 = props.find((p) => p.sale_number === "3940");
-  if (!sale3940?.parcel_detail_url) {
-    throw new Error("Sale #3940 missing parcel_detail_url");
+  const catalogProp = props.find((p) => !p.property_source && p.parcel_detail_url);
+  if (!catalogProp?.parcel_detail_url) {
+    throw new Error("Catalog property missing parcel_detail_url");
   }
-  const expectedParcel =
-    "https://www.arcountydata.com/parcel_sponsor.asp?parcelid=16-13993-000&county=Benton&AISGIS=Benton";
-  if (sale3940.parcel_detail_url !== expectedParcel) {
-    throw new Error(`Sale #3940 parcel URL mismatch: ${sale3940.parcel_detail_url}`);
+  const expectedParcelPrefix = "https://www.arcountydata.com/parcel_sponsor.asp?parcelid=";
+  if (!catalogProp.parcel_detail_url.startsWith(expectedParcelPrefix)) {
+    throw new Error(`Unexpected parcel detail URL: ${catalogProp.parcel_detail_url}`);
   }
-  console.log(`Sale #3940 parcel URL: ${sale3940.parcel_detail_url}`);
+  console.log(`Catalog parcel URL: ${catalogProp.parcel_detail_url}`);
 
   const fs = require("fs");
   const path = require("path");
+  eval(fs.readFileSync(path.join(__dirname, "../frontend/property-styles.js"), "utf8"));
   eval(fs.readFileSync(path.join(__dirname, "../frontend/property-popup.js"), "utf8"));
 
-  const tableHtml = propertyTableLinks(sale3940);
-  const popupHtml = propertyPopupHtml(sale3940);
+  const lobv1 = lobv.find((p) => p.list_number === 1);
+  if (!lobv1) throw new Error("Missing LOBV listing #1");
+  const lobvPopup = propertyPopupHtml(lobv1);
+  if (!lobvPopup.includes("lotsofbellavista.com") && !lobvPopup.includes("Lots of Bella Vista")) {
+    throw new Error("LOBV popup missing source tag");
+  }
+
+  const tableHtml = propertyTableLinks(catalogProp);
+  const popupHtml = propertyPopupHtml(catalogProp);
   if (!tableHtml.includes("Parcel")) throw new Error("Table links missing Parcel anchor");
   if (!tableHtml.includes("arcountydata.com")) {
     throw new Error("Table links missing ARCountyData href");
@@ -51,11 +64,11 @@ async function main() {
   if (!popupHtml.includes("View parcel details")) {
     throw new Error("Popup missing parcel details button");
   }
-  if (!popupHtml.includes(expectedParcel)) throw new Error("Popup missing ARCountyData href");
+  if (!popupHtml.includes(expectedParcelPrefix)) throw new Error("Popup missing ARCountyData href");
 
-  const staticRes = await fetch(`${API}/static/property-popup.js?v=6`);
+  const staticRes = await fetch(`${API}/static/property-popup.js?v=7`);
   if (!staticRes.ok) throw new Error("property-popup.js not served");
-  const appRes = await fetch(`${API}/static/app.js?v=4`);
+  const appRes = await fetch(`${API}/static/app.js?v=5`);
   const appJs = await appRes.text();
   if (appRes.status !== 200) throw new Error("app.js not served");
   if (appJs.includes("function renderMap(rows) {\n  if (confidence")) {

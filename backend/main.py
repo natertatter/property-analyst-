@@ -22,6 +22,7 @@ from county_geocoder import all_county_centroids
 from county_gis_urls import get_county_gis_url
 from parcel_detail_urls import get_parcel_detail_url
 from geocoder import geocode_properties
+from lots_of_bella_vista import fetch_lots_of_bella_vista, is_bella_vista_context
 from parser import ParsedProperty, matches_criteria
 from scraper import fetch_catalog
 
@@ -104,6 +105,12 @@ def _property_to_dict(prop: ParsedProperty, geo: Optional[dict] = None) -> dict:
         "cosl_property_url": cosl_property_url,
         "county_gis_url": county_gis_url,
         "parcel_detail_url": parcel_detail_url,
+        "property_source": prop.property_source,
+        "source_label": prop.source_label,
+        "source_url": prop.source_url,
+        "min_bid": prop.min_bid,
+        "appraised_value": prop.appraised_value,
+        "list_number": prop.list_number,
     }
     if geo:
         data.update(geo)
@@ -150,12 +157,14 @@ async def _analyze_catalog(
         _property_to_dict(prop, geo if geocode else None)
         for prop, geo in zip(filtered, geocodes or [None] * len(filtered))
     ]
+    results = await _merge_lots_of_bella_vista(results, city_keywords, geocode)
 
     summary = {
         "total_catalog_rows": len(properties),
         "active_rows": len(active),
         "matched_rows": len(filtered),
         "mapped_rows": sum(1 for r in results if r.get("lat") is not None),
+        "curated_rows": sum(1 for r in results if r.get("property_source") == "lotsofbellavista.com"),
         "by_building_status": {},
         "taxes_total": round(sum(r["taxes_owed"] or 0 for r in results), 2),
         "acres_total": round(sum(r["acres"] or 0 for r in results), 2),
@@ -165,6 +174,23 @@ async def _analyze_catalog(
         summary["by_building_status"][status] = summary["by_building_status"].get(status, 0) + 1
 
     return {"meta": meta, "summary": summary, "properties": results}
+
+
+async def _merge_lots_of_bella_vista(
+    properties: list[dict],
+    city_keywords: list[str],
+    geocode: bool,
+) -> list[dict]:
+    if not is_bella_vista_context(city_keywords):
+        return properties
+
+    curated = await fetch_lots_of_bella_vista(geocode=geocode)
+    existing_parcels = {row.get("parcel_number") for row in properties}
+    merged = list(properties)
+    for row in curated:
+        if row.get("parcel_number") not in existing_parcels:
+            merged.append(row)
+    return merged
 
 
 @app.get("/api/health")
@@ -264,6 +290,23 @@ async def catalog_map(
         "meta": result["meta"],
         "summary": result["summary"],
         "properties": result["properties"],
+    }
+
+
+@app.get("/api/curated/lots-of-bella-vista")
+async def lots_of_bella_vista(geocode: bool = True):
+    try:
+        properties = await fetch_lots_of_bella_vista(geocode=geocode)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    return {
+        "meta": {
+            "source": "lotsofbellavista.com",
+            "source_label": "Lots of Bella Vista",
+            "count": len(properties),
+        },
+        "properties": properties,
     }
 
 

@@ -19,8 +19,11 @@ const PARCEL_SORT_FIELDS = {
   city: { key: "city", type: "string" },
   acres: { key: "acres", type: "number" },
   taxes_owed: { key: "taxes_owed", type: "number" },
+  min_bid: { key: "min_bid", type: "number" },
   building_status: { key: "building_status", type: "string" },
   parcel_number: { key: "parcel_number", type: "string" },
+  property_source: { key: "property_source", type: "string" },
+  list_number: { key: "list_number", type: "number" },
 };
 
 const BUILDING_LABELS = {
@@ -72,8 +75,13 @@ function getParcelTargetCounty(rows) {
 
 function compareSortValues(a, b, type, reverse) {
   if (type === "number") {
-    const av = a == null ? (reverse ? -Infinity : Infinity) : Number(a);
-    const bv = b == null ? (reverse ? -Infinity : Infinity) : Number(b);
+    const aMissing = a == null;
+    const bMissing = b == null;
+    if (aMissing && bMissing) return 0;
+    if (aMissing) return reverse ? -1 : 1;
+    if (bMissing) return reverse ? 1 : -1;
+    const av = Number(a);
+    const bv = Number(b);
     return reverse ? bv - av : av - bv;
   }
   const av = String(a ?? "");
@@ -85,9 +93,15 @@ function sortParcelRows(rows) {
   const config = PARCEL_SORT_FIELDS[parcelSortBy];
   if (!config) return rows;
   const reverse = parcelSortDir === "desc";
-  return [...rows].sort((a, b) =>
-    compareSortValues(a[config.key], b[config.key], config.type, reverse)
-  );
+  return [...rows].sort((a, b) => {
+    let av = a[config.key];
+    let bv = b[config.key];
+    if (parcelSortBy === "taxes_owed") {
+      av = a.taxes_owed ?? a.min_bid;
+      bv = b.taxes_owed ?? b.min_bid;
+    }
+    return compareSortValues(av, bv, config.type, reverse);
+  });
 }
 
 function markSortedHeaders(thead, sortBy, sortDir) {
@@ -246,13 +260,13 @@ function renderParcelMarkers(rows) {
   const displayRows = filterParcelRows(rows);
   displayRows.forEach((row) => {
     if (row.lat == null || row.lon == null) return;
-    const baseStyle = {
+    const baseStyle = getPropertyMarkerStyle(row, {
       radius: 5,
       color: "#7c3aed",
       fillColor: "#8b5cf6",
       fillOpacity: 0.85,
       weight: 1,
-    };
+    });
     const marker = createPropertyMarker(row.lat, row.lon, row, BUILDING_LABELS, baseStyle);
     stateParcels.addLayer(marker);
     bounds.push([row.lat, row.lon]);
@@ -326,6 +340,15 @@ async function loadCountyParcels(rows) {
       parcelRows.push(...(data.properties || []));
     }
 
+    if (target.includes("BENTON")) {
+      try {
+        const curated = await fetchLotsOfBellaVista(true);
+        parcelRows = mergeCuratedProperties(parcelRows, curated);
+      } catch (error) {
+        console.warn("Could not load Lots of Bella Vista listings:", error);
+      }
+    }
+
     const mapped = parcelRows.filter((p) => p.lat != null).length;
     setStateStatus(`${target} County: ${parcelRows.length} parcels loaded, ${mapped} on map.`);
   } catch (error) {
@@ -367,9 +390,10 @@ function setStateTableMode(mode) {
       <th data-sort="owner_name">Owner</th>
       <th data-sort="city">City</th>
       <th data-sort="acres">Acres</th>
-      <th data-sort="taxes_owed">Taxes</th>
+      <th data-sort="taxes_owed">Taxes / Bid</th>
       <th data-sort="building_status">Building</th>
       <th data-sort="parcel_number">Parcel</th>
+      <th data-sort="property_source">Source</th>
       <th>Links</th>
     `;
     document.getElementById("state-table-caption").textContent = "Parcels in county";
@@ -404,15 +428,17 @@ function renderStateTable(rows) {
     displayRows.forEach((row) => {
       const tr = document.createElement("tr");
       if (SavedProperties.isSaved(row)) tr.classList.add("saved-row");
+      if (isLotsOfBellaVista(row)) tr.classList.add("lobv-row");
     tr.innerHTML = `
       <td class="pin-cell">${SavedProperties.tablePinButton(row)}</td>
-      <td>${row.sale_number || ""}</td>
-      <td>${row.owner_name || ""}</td>
+      <td>${isLotsOfBellaVista(row) ? row.list_number || "" : row.sale_number || ""}</td>
+      <td>${row.owner_name || row.legal_description || ""}</td>
       <td>${row.city || ""}</td>
       <td>${formatAcres(row.acres)}</td>
-      <td>${formatMoney(row.taxes_owed)}</td>
+      <td>${isLotsOfBellaVista(row) ? formatBidMoney(row.min_bid) : formatMoney(row.taxes_owed)}</td>
       <td>${BUILDING_LABELS[row.building_status] || row.building_status}</td>
       <td>${row.parcel_number || ""}</td>
+      <td>${sourceTagHtml(row) || "Tax sale"}</td>
       <td class="actions link-cell">${propertyTableLinks(row)}</td>
     `;
       SavedProperties.bindTablePinButtons(tr);

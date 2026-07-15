@@ -25,7 +25,7 @@ const SavedProperties = (() => {
   }
 
   function getPropertyId(row) {
-    return [row.parcel_number || "", row.sale_number || "", row.catalog_url || ""].join("|");
+    return [row.property_source || "cosl", row.parcel_number || "", row.sale_number || "", row.catalog_url || ""].join("|");
   }
 
   function registerRow(row) {

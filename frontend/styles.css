@@ -230,6 +230,29 @@ tr.saved-row {
   background: #fffbeb;
 }
 
+.lobv-row {
+  background: #f0fdfa;
+}
+
+.source-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  text-decoration: none;
+  margin-bottom: 0.35rem;
+}
+
+.source-tag-lobv {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.popup-source {
+  margin-bottom: 0.35rem;
+}
+
 .popup-links {
   margin-top: 0.6rem;
   display: flex;
