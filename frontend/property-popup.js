@@ -95,12 +95,17 @@ function propertyPopupHtml(row, buildingLabels) {
     : `Parcel ${parcelLabel}`;
   const saveBtn = typeof SavedProperties !== "undefined" ? SavedProperties.saveButtonHtml(row) : "";
   const sourceTag = typeof sourceTagHtml !== "undefined" ? sourceTagHtml(row) : "";
-  const title = isLotsOfBellaVista(row)
+  const title = isCuratedListing(row)
     ? `Listing #${row.list_number || "?"}`
     : `Sale #${row.sale_number || "?"}`;
-  const pricingLine = isLotsOfBellaVista(row)
-    ? `Min bid ${formatBidMoney(row.min_bid)} · Appraised ${formatBidMoney(row.appraised_value)}`
+  const pricingLine = isCuratedListing(row)
+    ? curatedPricingLine(row)
     : `${acres} acres · ${money}`;
+  const notesLine = isCuratedListing(row) && row.listing_notes && isLotsOfBellaVista(row)
+    ? `${row.listing_notes}<br/>`
+    : isCuratedListing(row) && row.building_detail && isRedditSellerLot(row)
+      ? `<small>${row.building_detail}</small><br/>`
+      : "";
 
   return `
     <div class="property-popup">
@@ -110,6 +115,7 @@ function propertyPopupHtml(row, buildingLabels) {
       ${row.city || ""} ${row.addition ? "· " + row.addition : ""}<br/>
       ${parcelHtml}<br/>
       ${pricingLine}<br/>
+      ${notesLine}
       ${labels[row.building_status] || row.building_status}<br/>
       ${row.geocode_label ? `<small>${row.geocode_label}</small><br/>` : ""}
       ${saveBtn}

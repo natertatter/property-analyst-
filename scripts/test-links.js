@@ -26,9 +26,14 @@ async function main() {
   console.log(`API: ${withParcel.length}/${props.length} properties have parcel detail URLs`);
 
   const lobv = props.filter((p) => p.property_source === "lotsofbellavista.com");
+  const reddit = props.filter((p) => p.property_source === "reddit_seller");
   console.log(`API: ${lobv.length} Lots of Bella Vista listings included`);
+  console.log(`API: ${reddit.length} Reddit seller lots included`);
   if (lobv.length !== 20) {
     throw new Error(`Expected 20 Lots of Bella Vista listings, got ${lobv.length}`);
+  }
+  if (reddit.length !== 10) {
+    throw new Error(`Expected 10 Reddit seller lots, got ${reddit.length}`);
   }
   console.log(`API: ${withGis.length}/${props.length} properties have county GIS URLs`);
   console.log(`API: ${withCosl.length}/${props.length} properties have COSL URLs`);
@@ -48,11 +53,13 @@ async function main() {
   eval(fs.readFileSync(path.join(__dirname, "../frontend/property-styles.js"), "utf8"));
   eval(fs.readFileSync(path.join(__dirname, "../frontend/property-popup.js"), "utf8"));
 
-  const lobv1 = lobv.find((p) => p.list_number === 1);
-  if (!lobv1) throw new Error("Missing LOBV listing #1");
-  const lobvPopup = propertyPopupHtml(lobv1);
-  if (!lobvPopup.includes("lotsofbellavista.com") && !lobvPopup.includes("Lots of Bella Vista")) {
-    throw new Error("LOBV popup missing source tag");
+  const redditLot = reddit.find((p) => p.parcel_number === "16-28221-000");
+  if (!redditLot || redditLot.asking_price !== 13500) {
+    throw new Error("Reddit perc lot pricing mismatch");
+  }
+  const redditPopup = propertyPopupHtml(redditLot);
+  if (!redditPopup.includes("Reddit seller")) {
+    throw new Error("Reddit popup missing source tag");
   }
 
   const tableHtml = propertyTableLinks(catalogProp);
@@ -66,9 +73,9 @@ async function main() {
   }
   if (!popupHtml.includes(expectedParcelPrefix)) throw new Error("Popup missing ARCountyData href");
 
-  const staticRes = await fetch(`${API}/static/property-popup.js?v=7`);
+  const staticRes = await fetch(`${API}/static/property-popup.js?v=8`);
   if (!staticRes.ok) throw new Error("property-popup.js not served");
-  const appRes = await fetch(`${API}/static/app.js?v=5`);
+  const appRes = await fetch(`${API}/static/app.js?v=6`);
   const appJs = await appRes.text();
   if (appRes.status !== 200) throw new Error("app.js not served");
   if (appJs.includes("function renderMap(rows) {\n  if (confidence")) {

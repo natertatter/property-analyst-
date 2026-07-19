@@ -234,6 +234,10 @@ tr.saved-row {
   background: #f0fdfa;
 }
 
+.reddit-row {
+  background: #fff7ed;
+}
+
 .source-tag {
   display: inline-block;
   font-size: 0.72rem;
@@ -247,6 +251,11 @@ tr.saved-row {
 .source-tag-lobv {
   background: #ccfbf1;
   color: #0f766e;
+}
+
+.source-tag-reddit {
+  background: #ffedd5;
+  color: #c2410c;
 }
 
 .popup-source {

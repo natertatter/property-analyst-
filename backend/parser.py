@@ -36,7 +36,9 @@ class ParsedProperty:
     source_label: Optional[str] = None
     source_url: Optional[str] = None
     min_bid: Optional[float] = None
+    asking_price: Optional[float] = None
     appraised_value: Optional[float] = None
+    listing_notes: Optional[str] = None
     list_number: Optional[int] = None
     datascout_url: Optional[str] = None
     cosl_parcel_url: Optional[str] = None

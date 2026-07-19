@@ -80,7 +80,9 @@ function renderSummary(data) {
       <div class="summary-card"><span>Catalog rows</span><strong>${s.total_catalog_rows}</strong></div>
       <div class="summary-card"><span>Matched</span><strong>${s.matched_rows}</strong></div>
       <div class="summary-card"><span>On map</span><strong>${s.mapped_rows}</strong></div>
-      ${s.curated_rows ? `<div class="summary-card"><span>Lots of Bella Vista</span><strong>${s.curated_rows}</strong></div>` : ""}
+      ${s.curated_rows ? `<div class="summary-card"><span>Curated listings</span><strong>${s.curated_rows}</strong></div>` : ""}
+      ${s.lobv_rows ? `<div class="summary-card"><span>Lots of Bella Vista</span><strong>${s.lobv_rows}</strong></div>` : ""}
+      ${s.reddit_rows ? `<div class="summary-card"><span>Reddit seller lots</span><strong>${s.reddit_rows}</strong></div>` : ""}
       <div class="summary-card"><span>Total taxes</span><strong>${formatMoney(s.taxes_total)}</strong></div>
       <div class="summary-card"><span>Total acres</span><strong>${formatAcres(s.acres_total)}</strong></div>
       <div class="summary-card"><span>Saved</span><strong>${SavedProperties.count()}</strong></div>
@@ -147,7 +149,9 @@ function renderTable(rows) {
   displayRows.forEach((row, index) => {
     const tr = document.createElement("tr");
     if (SavedProperties.isSaved(row)) tr.classList.add("saved-row");
+    if (isCuratedListing(row)) tr.classList.add("curated-row");
     if (isLotsOfBellaVista(row)) tr.classList.add("lobv-row");
+    if (isRedditSellerLot(row)) tr.classList.add("reddit-row");
     const plss =
       row.section && row.township && row.range
         ? `S${row.section} T${row.township} R${row.range}`
@@ -155,11 +159,11 @@ function renderTable(rows) {
 
     tr.innerHTML = `
       <td class="pin-cell">${SavedProperties.tablePinButton(row)}</td>
-      <td>${isLotsOfBellaVista(row) ? row.list_number || "" : row.sale_number || ""}</td>
+      <td>${isCuratedListing(row) ? row.list_number || "" : row.sale_number || ""}</td>
       <td>${row.owner_name || row.legal_description || ""}</td>
       <td>${row.city || ""}</td>
       <td>${formatAcres(row.acres)}</td>
-      <td>${isLotsOfBellaVista(row) ? formatBidMoney(row.min_bid) : formatMoney(row.taxes_owed)}</td>
+      <td>${isCuratedListing(row) ? formatBidMoney(curatedListPrice(row)) : formatMoney(row.taxes_owed)}</td>
       <td>${BUILDING_LABELS[row.building_status] || row.building_status}</td>
       <td>${plss}</td>
       <td>${row.parcel_number || ""}</td>

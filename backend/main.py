@@ -23,6 +23,8 @@ from county_gis_urls import get_county_gis_url
 from parcel_detail_urls import get_parcel_detail_url
 from geocoder import geocode_properties
 from lots_of_bella_vista import fetch_lots_of_bella_vista, is_bella_vista_context
+from reddit_seller_lots import fetch_reddit_seller_lots
+from curated_listings import merge_curated_rows
 from parser import ParsedProperty, matches_criteria
 from scraper import fetch_catalog
 
@@ -109,7 +111,9 @@ def _property_to_dict(prop: ParsedProperty, geo: Optional[dict] = None) -> dict:
         "source_label": prop.source_label,
         "source_url": prop.source_url,
         "min_bid": prop.min_bid,
+        "asking_price": prop.asking_price,
         "appraised_value": prop.appraised_value,
+        "listing_notes": prop.listing_notes,
         "list_number": prop.list_number,
     }
     if geo:
@@ -157,14 +161,16 @@ async def _analyze_catalog(
         _property_to_dict(prop, geo if geocode else None)
         for prop, geo in zip(filtered, geocodes or [None] * len(filtered))
     ]
-    results = await _merge_lots_of_bella_vista(results, city_keywords, geocode)
+    results = await _merge_curated_listings(results, city_keywords, geocode)
 
     summary = {
         "total_catalog_rows": len(properties),
         "active_rows": len(active),
         "matched_rows": len(filtered),
         "mapped_rows": sum(1 for r in results if r.get("lat") is not None),
-        "curated_rows": sum(1 for r in results if r.get("property_source") == "lotsofbellavista.com"),
+        "curated_rows": sum(1 for r in results if r.get("property_source")),
+        "lobv_rows": sum(1 for r in results if r.get("property_source") == "lotsofbellavista.com"),
+        "reddit_rows": sum(1 for r in results if r.get("property_source") == "reddit_seller"),
         "by_building_status": {},
         "taxes_total": round(sum(r["taxes_owed"] or 0 for r in results), 2),
         "acres_total": round(sum(r["acres"] or 0 for r in results), 2),
@@ -176,7 +182,7 @@ async def _analyze_catalog(
     return {"meta": meta, "summary": summary, "properties": results}
 
 
-async def _merge_lots_of_bella_vista(
+async def _merge_curated_listings(
     properties: list[dict],
     city_keywords: list[str],
     geocode: bool,
@@ -184,13 +190,9 @@ async def _merge_lots_of_bella_vista(
     if not is_bella_vista_context(city_keywords):
         return properties
 
-    curated = await fetch_lots_of_bella_vista(geocode=geocode)
-    existing_parcels = {row.get("parcel_number") for row in properties}
-    merged = list(properties)
-    for row in curated:
-        if row.get("parcel_number") not in existing_parcels:
-            merged.append(row)
-    return merged
+    lobv = await fetch_lots_of_bella_vista(geocode=geocode)
+    reddit = await fetch_reddit_seller_lots(geocode=geocode)
+    return merge_curated_rows(merge_curated_rows(properties, lobv), reddit)
 
 
 @app.get("/api/health")
@@ -290,6 +292,23 @@ async def catalog_map(
         "meta": result["meta"],
         "summary": result["summary"],
         "properties": result["properties"],
+    }
+
+
+@app.get("/api/curated/reddit-seller-lots")
+async def reddit_seller_lots(geocode: bool = True):
+    try:
+        properties = await fetch_reddit_seller_lots(geocode=geocode)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    return {
+        "meta": {
+            "source": "reddit_seller",
+            "source_label": "Reddit seller lot",
+            "count": len(properties),
+        },
+        "properties": properties,
     }
 
 

@@ -342,10 +342,10 @@ async function loadCountyParcels(rows) {
 
     if (target.includes("BENTON")) {
       try {
-        const curated = await fetchLotsOfBellaVista(true);
+        const curated = await fetchAllCuratedListings(true);
         parcelRows = mergeCuratedProperties(parcelRows, curated);
       } catch (error) {
-        console.warn("Could not load Lots of Bella Vista listings:", error);
+        console.warn("Could not load curated Bella Vista listings:", error);
       }
     }
 
@@ -428,14 +428,16 @@ function renderStateTable(rows) {
     displayRows.forEach((row) => {
       const tr = document.createElement("tr");
       if (SavedProperties.isSaved(row)) tr.classList.add("saved-row");
+      if (isCuratedListing(row)) tr.classList.add("curated-row");
       if (isLotsOfBellaVista(row)) tr.classList.add("lobv-row");
+      if (isRedditSellerLot(row)) tr.classList.add("reddit-row");
     tr.innerHTML = `
       <td class="pin-cell">${SavedProperties.tablePinButton(row)}</td>
-      <td>${isLotsOfBellaVista(row) ? row.list_number || "" : row.sale_number || ""}</td>
+      <td>${isCuratedListing(row) ? row.list_number || "" : row.sale_number || ""}</td>
       <td>${row.owner_name || row.legal_description || ""}</td>
       <td>${row.city || ""}</td>
       <td>${formatAcres(row.acres)}</td>
-      <td>${isLotsOfBellaVista(row) ? formatBidMoney(row.min_bid) : formatMoney(row.taxes_owed)}</td>
+      <td>${isCuratedListing(row) ? formatBidMoney(curatedListPrice(row)) : formatMoney(row.taxes_owed)}</td>
       <td>${BUILDING_LABELS[row.building_status] || row.building_status}</td>
       <td>${row.parcel_number || ""}</td>
       <td>${sourceTagHtml(row) || "Tax sale"}</td>

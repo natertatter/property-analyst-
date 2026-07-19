@@ -11,28 +11,17 @@ from typing import Optional
 
 import httpx
 
-from county_gis_urls import get_county_gis_url
-from parcel_detail_urls import get_parcel_detail_url
+from benton_parcel_geocoder import geocode_benton_parcel
+from curated_listings import curated_property_to_dict
 from parser import ParsedProperty, parse_legal_row
 
 DATA_FILE = Path(__file__).resolve().parent / "data" / "lots_of_bella_vista.json"
-BENTON_PARCEL_QUERY_URL = (
-    "https://gis.bentoncountyar.gov/arcgis/rest/services/Assessor/ParcelMobile/MapServer/1/query"
-)
-USER_AGENT = "PropertyAnalyst/1.0 (tax-sale prototype)"
 
 
 @lru_cache(maxsize=1)
 def _load_dataset() -> dict:
     with open(DATA_FILE, encoding="utf-8") as handle:
         return json.load(handle)
-
-
-def _polygon_centroid(rings: list) -> tuple[float, float]:
-    ring = rings[0]
-    lats = [p[1] for p in ring]
-    lons = [p[0] for p in ring]
-    return sum(lats) / len(lats), sum(lons) / len(lons)
 
 
 def _parse_lot_block_addition(legal: str) -> tuple[Optional[str], Optional[str], Optional[str]]:
@@ -72,86 +61,10 @@ def _entry_to_property(entry: dict, meta: dict) -> ParsedProperty:
     prop.source_label = meta["source_label"]
     prop.source_url = meta["source_url"]
     prop.min_bid = entry.get("min_bid")
+    prop.asking_price = entry.get("min_bid")
     prop.appraised_value = entry.get("appraised_value")
     prop.list_number = entry.get("list_number")
     return prop
-
-
-async def _geocode_benton_parcel(
-    client: httpx.AsyncClient,
-    parcel_number: str,
-) -> Optional[dict]:
-    response = await client.get(
-        BENTON_PARCEL_QUERY_URL,
-        params={
-            "where": f"PARCELID='{parcel_number}'",
-            "returnGeometry": "true",
-            "outSR": "4326",
-            "f": "json",
-        },
-        headers={"User-Agent": USER_AGENT},
-    )
-    response.raise_for_status()
-    data = response.json()
-    features = data.get("features") or []
-    if not features:
-        return None
-
-    geometry = features[0].get("geometry") or {}
-    rings = geometry.get("rings")
-    if not rings:
-        return None
-
-    lat, lon = _polygon_centroid(rings)
-    attrs = features[0].get("attributes") or {}
-    label = attrs.get("PH_ADD") or attrs.get("PARCELID") or parcel_number
-    return {
-        "lat": lat,
-        "lon": lon,
-        "geocode_method": "benton_parcel",
-        "geocode_label": f"{label} (Benton County parcel)",
-        "geocode_confidence": "high",
-    }
-
-
-def property_to_dict(prop: ParsedProperty, geo: Optional[dict] = None) -> dict:
-    data = {
-        "sale_number": prop.sale_number,
-        "list_number": prop.list_number,
-        "owner_name": prop.owner_name,
-        "legal_description": prop.legal_description,
-        "interested_parties": prop.interested_parties,
-        "county": prop.county,
-        "parcel_number": prop.parcel_number,
-        "taxes_owed": prop.taxes_owed,
-        "min_bid": prop.min_bid,
-        "appraised_value": prop.appraised_value,
-        "acres": prop.acres,
-        "city": prop.city,
-        "section": prop.section,
-        "township": prop.township,
-        "range": prop.range_,
-        "lot": prop.lot,
-        "block": prop.block,
-        "addition": prop.addition,
-        "building_status": prop.building_status,
-        "building_detail": prop.building_detail,
-        "location_type": prop.location_type,
-        "geocode_query": prop.geocode_query,
-        "is_cancelled": prop.is_cancelled,
-        "property_source": prop.property_source,
-        "source_label": prop.source_label,
-        "source_url": prop.source_url,
-        "datascout_url": prop.datascout_url,
-        "cosl_parcel_url": prop.cosl_parcel_url,
-        "catalog_url": prop.catalog_url,
-        "cosl_property_url": prop.cosl_parcel_url or prop.catalog_url,
-        "county_gis_url": get_county_gis_url(prop.county, prop.parcel_number),
-        "parcel_detail_url": get_parcel_detail_url(prop.county, prop.parcel_number),
-    }
-    if geo:
-        data.update(geo)
-    return data
 
 
 async def fetch_lots_of_bella_vista(geocode: bool = True) -> list[dict]:
@@ -159,7 +72,7 @@ async def fetch_lots_of_bella_vista(geocode: bool = True) -> list[dict]:
     properties = [_entry_to_property(entry, meta) for entry in meta["properties"]]
 
     if not geocode:
-        return [property_to_dict(prop) for prop in properties]
+        return [curated_property_to_dict(prop) for prop in properties]
 
     results: list[dict] = []
     cache: dict[str, dict] = {}
@@ -169,11 +82,11 @@ async def fetch_lots_of_bella_vista(geocode: bool = True) -> list[dict]:
             if parcel in cache:
                 geo = cache[parcel]
             else:
-                geo = await _geocode_benton_parcel(client, parcel)
+                geo = await geocode_benton_parcel(client, parcel)
                 if geo:
                     cache[parcel] = geo
                 await asyncio.sleep(0.05)
-            results.append(property_to_dict(prop, geo))
+            results.append(curated_property_to_dict(prop, geo))
     return results
 
 
