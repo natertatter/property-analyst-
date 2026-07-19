@@ -1,0 +1,377 @@
+{
+  "CLEVELAND": {
+    "name": "CLEVELAND",
+    "lat": 33.858389,
+    "lon": -92.366135
+  },
+  "ASHLEY": {
+    "name": "ASHLEY",
+    "lat": 33.244386,
+    "lon": -92.036216
+  },
+  "CHICOT": {
+    "name": "CHICOT",
+    "lat": 33.330265,
+    "lon": -91.152282
+  },
+  "CONWAY": {
+    "name": "CONWAY",
+    "lat": 35.176263,
+    "lon": -92.654493
+  },
+  "RANDOLPH": {
+    "name": "RANDOLPH",
+    "lat": 36.278495,
+    "lon": -90.960314
+  },
+  "HOWARD": {
+    "name": "HOWARD",
+    "lat": 33.942121,
+    "lon": -94.0405
+  },
+  "UNION": {
+    "name": "UNION",
+    "lat": 33.298949,
+    "lon": -92.50022
+  },
+  "SEBASTIAN": {
+    "name": "SEBASTIAN",
+    "lat": 35.21186,
+    "lon": -94.30021
+  },
+  "FULTON": {
+    "name": "FULTON",
+    "lat": 36.383712,
+    "lon": -91.754363
+  },
+  "PERRY": {
+    "name": "PERRY",
+    "lat": 34.968606,
+    "lon": -92.704514
+  },
+  "FRANKLIN": {
+    "name": "FRANKLIN",
+    "lat": 35.479991,
+    "lon": -93.957216
+  },
+  "INDEPENDENCE": {
+    "name": "INDEPENDENCE",
+    "lat": 35.762805,
+    "lon": -91.332686
+  },
+  "GARLAND": {
+    "name": "GARLAND",
+    "lat": 34.593314,
+    "lon": -93.155109
+  },
+  "NEWTON": {
+    "name": "NEWTON",
+    "lat": 35.91386,
+    "lon": -93.224991
+  },
+  "LONOKE": {
+    "name": "LONOKE",
+    "lat": 34.874205,
+    "lon": -91.872185
+  },
+  "JACKSON": {
+    "name": "JACKSON",
+    "lat": 35.740811,
+    "lon": -91.284334
+  },
+  "WHITE": {
+    "name": "WHITE",
+    "lat": 35.135525,
+    "lon": -91.746379
+  },
+  "DESHA": {
+    "name": "DESHA",
+    "lat": 33.864365,
+    "lon": -91.148698
+  },
+  "YELL": {
+    "name": "YELL",
+    "lat": 35.13912,
+    "lon": -93.088302
+  },
+  "PHILLIPS": {
+    "name": "PHILLIPS",
+    "lat": 34.258311,
+    "lon": -91.014989
+  },
+  "CRITTENDEN": {
+    "name": "CRITTENDEN",
+    "lat": 35.140466,
+    "lon": -90.203243
+  },
+  "STONE": {
+    "name": "STONE",
+    "lat": 35.951397,
+    "lon": -92.056898
+  },
+  "NEVADA": {
+    "name": "NEVADA",
+    "lat": 33.863273,
+    "lon": -93.292121
+  },
+  "POLK": {
+    "name": "POLK",
+    "lat": 34.473779,
+    "lon": -94.229317
+  },
+  "CLEBURNE": {
+    "name": "CLEBURNE",
+    "lat": 35.478451,
+    "lon": -91.906602
+  },
+  "VANBUREN": {
+    "name": "VAN BUREN",
+    "lat": 35.603747,
+    "lon": -92.564229
+  },
+  "LINCOLN": {
+    "name": "LINCOLN",
+    "lat": 34.070841,
+    "lon": -91.571279
+  },
+  "LEE": {
+    "name": "LEE",
+    "lat": 34.774447,
+    "lon": -90.540947
+  },
+  "PIKE": {
+    "name": "PIKE",
+    "lat": 34.031735,
+    "lon": -93.515533
+  },
+  "GRANT": {
+    "name": "GRANT",
+    "lat": 34.176519,
+    "lon": -92.452489
+  },
+  "LAFAYETTE": {
+    "name": "LAFAYETTE",
+    "lat": 33.291261,
+    "lon": -93.629041
+  },
+  "JEFFERSON": {
+    "name": "JEFFERSON",
+    "lat": 34.154406,
+    "lon": -91.569529
+  },
+  "PRAIRIE": {
+    "name": "PRAIRIE",
+    "lat": 34.817646,
+    "lon": -91.617638
+  },
+  "CROSS": {
+    "name": "CROSS",
+    "lat": 35.293889,
+    "lon": -90.806734
+  },
+  "MONROE": {
+    "name": "MONROE",
+    "lat": 34.605771,
+    "lon": -91.245468
+  },
+  "MADISON": {
+    "name": "MADISON",
+    "lat": 36.188076,
+    "lon": -93.668667
+  },
+  "SHARP": {
+    "name": "SHARP",
+    "lat": 36.220472,
+    "lon": -91.483763
+  },
+  "CLAY": {
+    "name": "CLAY",
+    "lat": 36.352589,
+    "lon": -90.330709
+  },
+  "LITTLERIVER": {
+    "name": "LITTLE RIVER",
+    "lat": 33.691945,
+    "lon": -94.169496
+  },
+  "SEVIER": {
+    "name": "SEVIER",
+    "lat": 33.92154,
+    "lon": -94.095991
+  },
+  "HOTSPRING": {
+    "name": "HOT SPRING",
+    "lat": 34.222127,
+    "lon": -93.038607
+  },
+  "POPE": {
+    "name": "POPE",
+    "lat": 35.250375,
+    "lon": -93.06138
+  },
+  "SCOTT": {
+    "name": "SCOTT",
+    "lat": 34.93485,
+    "lon": -94.275711
+  },
+  "MILLER": {
+    "name": "MILLER",
+    "lat": 33.369194,
+    "lon": -93.784619
+  },
+  "LOGAN": {
+    "name": "LOGAN",
+    "lat": 35.350049,
+    "lon": -93.579972
+  },
+  "CARROLL": {
+    "name": "CARROLL",
+    "lat": 36.341824,
+    "lon": -93.798419
+  },
+  "BENTON": {
+    "name": "BENTON",
+    "lat": 36.338248,
+    "lon": -93.901336
+  },
+  "CLARK": {
+    "name": "CLARK",
+    "lat": 33.969087,
+    "lon": -93.153419
+  },
+  "MONTGOMERY": {
+    "name": "MONTGOMERY",
+    "lat": 34.523204,
+    "lon": -93.684348
+  },
+  "HEMPSTEAD": {
+    "name": "HEMPSTEAD",
+    "lat": 33.782363,
+    "lon": -93.740264
+  },
+  "CRAWFORD": {
+    "name": "CRAWFORD",
+    "lat": 35.468329,
+    "lon": -94.164524
+  },
+  "MARION": {
+    "name": "MARION",
+    "lat": 36.280919,
+    "lon": -92.549926
+  },
+  "SEARCY": {
+    "name": "SEARCY",
+    "lat": 35.859019,
+    "lon": -92.67624
+  },
+  "WOODRUFF": {
+    "name": "WOODRUFF",
+    "lat": 35.248334,
+    "lon": -91.392605
+  },
+  "CALHOUN": {
+    "name": "CALHOUN",
+    "lat": 33.567513,
+    "lon": -92.531761
+  },
+  "STFRANCIS": {
+    "name": "ST. FRANCIS",
+    "lat": 35.052758,
+    "lon": -90.827186
+  },
+  "JOHNSON": {
+    "name": "JOHNSON",
+    "lat": 35.41051,
+    "lon": -93.496185
+  },
+  "BAXTER": {
+    "name": "BAXTER",
+    "lat": 36.25942,
+    "lon": -92.480941
+  },
+  "SALINE": {
+    "name": "SALINE",
+    "lat": 34.65164,
+    "lon": -92.695512
+  },
+  "DREW": {
+    "name": "DREW",
+    "lat": 33.499774,
+    "lon": -91.908734
+  },
+  "GREENE": {
+    "name": "GREENE",
+    "lat": 36.08447,
+    "lon": -90.477502
+  },
+  "DALLAS": {
+    "name": "DALLAS",
+    "lat": 33.974281,
+    "lon": -92.492705
+  },
+  "WASHINGTON": {
+    "name": "WASHINGTON",
+    "lat": 36.099956,
+    "lon": -94.102101
+  },
+  "OUACHITA": {
+    "name": "OUACHITA",
+    "lat": 33.575731,
+    "lon": -92.730314
+  },
+  "FAULKNER": {
+    "name": "FAULKNER",
+    "lat": 35.081993,
+    "lon": -92.484419
+  },
+  "CRAIGHEAD": {
+    "name": "CRAIGHEAD",
+    "lat": 35.918448,
+    "lon": -90.704097
+  },
+  "MISSISSIPPI": {
+    "name": "MISSISSIPPI",
+    "lat": 35.594568,
+    "lon": -89.964413
+  },
+  "BOONE": {
+    "name": "BOONE",
+    "lat": 36.426534,
+    "lon": -93.053032
+  },
+  "PULASKI": {
+    "name": "PULASKI",
+    "lat": 34.865602,
+    "lon": -92.397243
+  },
+  "LAWRENCE": {
+    "name": "LAWRENCE",
+    "lat": 36.094457,
+    "lon": -90.995022
+  },
+  "BRADLEY": {
+    "name": "BRADLEY",
+    "lat": 33.379772,
+    "lon": -92.168452
+  },
+  "ARKANSAS": {
+    "name": "ARKANSAS",
+    "lat": 34.188192,
+    "lon": -91.259155
+  },
+  "IZARD": {
+    "name": "IZARD",
+    "lat": 36.014501,
+    "lon": -92.044601
+  },
+  "POINSETT": {
+    "name": "POINSETT",
+    "lat": 35.55422,
+    "lon": -90.697048
+  },
+  "COLUMBIA": {
+    "name": "COLUMBIA",
+    "lat": 33.341455,
+    "lon": -93.38861
+  }
+}

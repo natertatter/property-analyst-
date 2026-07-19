@@ -1,0 +1,32 @@
+{
+  "source": "reddit_seller",
+  "source_label": "Reddit seller lot",
+  "county": "BENTON County",
+  "city": "BELLA VISTA",
+  "properties": [
+    { "list_number": 1, "parcel_number": "16-14940-000", "acres": 0.37, "lot_type": "standard" },
+    { "list_number": 2, "parcel_number": "16-19455-000", "acres": 0.33, "lot_type": "standard" },
+    { "list_number": 3, "parcel_number": "16-20170-000", "acres": 0.25, "lot_type": "standard" },
+    { "list_number": 4, "parcel_number": "16-20174-000", "acres": 0.31, "lot_type": "standard" },
+    { "list_number": 5, "parcel_number": "16-20176-000", "acres": 0.35, "lot_type": "standard" },
+    { "list_number": 6, "parcel_number": "16-23239-000", "acres": 0.31, "lot_type": "standard" },
+    { "list_number": 7, "parcel_number": "16-30267-000", "acres": 0.3, "lot_type": "standard" },
+    { "list_number": 8, "parcel_number": "16-22519-000", "acres": 0.27, "lot_type": "standard" },
+    {
+      "list_number": 9,
+      "parcel_number": "16-28221-000",
+      "acres": 0.42,
+      "lot_type": "perc",
+      "listing_notes": "Perc 3bd",
+      "asking_price": 13500
+    },
+    {
+      "list_number": 10,
+      "parcel_number": "16-02716-000",
+      "acres": 0.38,
+      "lot_type": "perc",
+      "listing_notes": "Perc 3bd + Survey",
+      "asking_price": 17250
+    }
+  ]
+}
